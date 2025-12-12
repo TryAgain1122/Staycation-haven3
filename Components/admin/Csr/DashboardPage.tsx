@@ -1,0 +1,354 @@
+"use client";
+
+import { Calendar, DollarSign, FileText, Users, Wallet, Package, CreditCard, Sparkles, XCircle } from "lucide-react";
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-700">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            title: "Total Bookings",
+            value: "156",
+            Icon: Calendar,
+            color: "bg-blue-500",
+            trend: "+12%"
+          },
+          {
+            title: "Pending Payments",
+            value: "₱45,000",
+            Icon: DollarSign,
+            color: "bg-green-500",
+            trend: "+8%"
+          },
+          {
+            title: "Active Cleaners",
+            value: "24",
+            Icon: Users,
+            color: "bg-orange-500",
+            trend: "+3"
+          },
+          {
+            title: "Total Deposits",
+            value: "₱120,000",
+            Icon: CreditCard,
+            color: "bg-purple-500",
+            trend: "+15%"
+          },
+        ].map((kpi, i) => {
+          const IconComponent = kpi.Icon;
+          return (
+            <div
+              key={i}
+              className={`${kpi.color} text-white rounded-lg p-6 shadow hover:shadow-lg animate-in fade-in slide-in-from-bottom duration-500`}
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <p className="text-sm opacity-90">{kpi.title}</p>
+              <p className="text-3xl font-bold mt-2">{kpi.value}</p>
+              <div className="flex items-center justify-between mt-2">
+                <IconComponent className="w-8 h-8" />
+                <span className="text-sm opacity-90">{kpi.trend}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Recent Activity Table */}
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b-2 border-gray-200">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                  Time
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                  Action
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                  Customer
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                  Details
+                </th>
+                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {
+                  time: "2:30 PM",
+                  action: "New Booking",
+                  customer: "John Smith",
+                  details: "Haven 2 - March 15-20",
+                  status: "Confirmed",
+                  statusColor: "bg-green-100 text-green-700",
+                  Icon: Calendar,
+                  iconColor: "text-blue-600",
+                },
+                {
+                  time: "1:45 PM",
+                  action: "Payment Received",
+                  customer: "Sarah Johnson",
+                  details: "₱8,000 deposit payment",
+                  status: "Completed",
+                  statusColor: "bg-blue-100 text-blue-700",
+                  Icon: DollarSign,
+                  iconColor: "text-green-600",
+                },
+                {
+                  time: "12:30 PM",
+                  action: "Cleaner Assigned",
+                  customer: "Maria Santos",
+                  details: "Haven 1 - Check-out cleaning",
+                  status: "Assigned",
+                  statusColor: "bg-orange-100 text-orange-700",
+                  Icon: Sparkles,
+                  iconColor: "text-orange-600",
+                },
+                {
+                  time: "11:15 AM",
+                  action: "Inventory Updated",
+                  customer: "System",
+                  details: "Towels restocked - Haven 3",
+                  status: "Updated",
+                  statusColor: "bg-purple-100 text-purple-700",
+                  Icon: Package,
+                  iconColor: "text-purple-600",
+                },
+                {
+                  time: "10:00 AM",
+                  action: "Booking Cancelled",
+                  customer: "Mike Wilson",
+                  details: "Haven 4 - April 5-8",
+                  status: "Refunded",
+                  statusColor: "bg-red-100 text-red-700",
+                  Icon: XCircle,
+                  iconColor: "text-red-600",
+                },
+              ].map((item, i) => {
+                const ActivityIcon = item.Icon;
+                return (
+                  <tr
+                    key={i}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-in fade-in duration-500"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <td className="py-4 px-4">
+                      <span className="text-sm font-medium text-gray-600">
+                        {item.time}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <ActivityIcon className={`w-5 h-5 ${item.iconColor}`} />
+                        <span className="text-sm font-semibold text-gray-800">
+                          {item.action}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <p className="text-sm font-medium text-gray-800">
+                        {item.customer}
+                      </p>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {item.details}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      <span
+                        className={`inline-block text-xs font-bold px-3 py-1.5 rounded-full ${item.statusColor}`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+          <p className="text-sm text-gray-600">Showing 5 of 48 activities</p>
+          <button className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors">
+            View All Activity
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Today&apos;s Tasks</h4>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Check-ins</span>
+              <span className="text-xl font-bold text-blue-600">8</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Check-outs</span>
+              <span className="text-xl font-bold text-orange-600">12</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Cleanings</span>
+              <span className="text-xl font-bold text-green-600">15</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Payment Status</h4>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Paid</span>
+              <span className="text-xl font-bold text-green-600">45</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Pending</span>
+              <span className="text-xl font-bold text-yellow-600">18</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Overdue</span>
+              <span className="text-xl font-bold text-red-600">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Inventory Alerts</h4>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Low Stock</span>
+              <span className="text-xl font-bold text-red-600">5</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Reorder</span>
+              <span className="text-xl font-bold text-yellow-600">8</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">In Stock</span>
+              <span className="text-xl font-bold text-green-600">42</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function BookingsPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Calendar className="w-12 h-12 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Bookings</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Manage all customer bookings and reservations here.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PaymentsPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <DollarSign className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Payments</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Track and manage payment transactions.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DeliverablesPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FileText className="w-12 h-12 text-purple-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deliverables</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Manage and track service deliverables.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CleanersPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="w-12 h-12 text-orange-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Cleaners</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Manage cleaner schedules and assignments.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DepositsPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Wallet className="w-12 h-12 text-indigo-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deposits</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Track customer deposits and refunds.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function InventoryPage() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Package className="w-12 h-12 text-pink-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Inventory</h2>
+          <p className="text-gray-600 max-w-md mx-auto mb-6">
+            Manage property inventory and supplies.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
