@@ -3,6 +3,7 @@
 import { Calendar, Search, Filter, Plus, Eye, Edit, Trash2, MapPin, User, Phone, Mail, CheckCircle, Clock, LogIn, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import ViewBookings from "./Modals/ViewBookings";
+import NewBookings from "./Modals/NewBookings";
 
 export default function BookingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +14,7 @@ export default function BookingsPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedBooking, setSelectedBooking] = useState<typeof bookings[0] | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isNewBookingModalOpen, setIsNewBookingModalOpen] = useState(false);
 
   const bookings = [
     {
@@ -138,10 +140,14 @@ export default function BookingsPage() {
           <h1 className="text-2xl font-bold text-gray-800">Bookings Management</h1>
           <p className="text-sm text-gray-500 mt-1">Manage all customer bookings and reservations</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold">
+        <button
+          onClick={() => setIsNewBookingModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+        >
           <Plus className="w-5 h-5" />
           New Booking
         </button>
+
       </div>
 
       {/* Stats Cards */}
@@ -534,6 +540,11 @@ export default function BookingsPage() {
       {isViewModalOpen && selectedBooking && (
         <ViewBookings booking={selectedBooking} onClose={handleCloseModal} />
       )}
+
+      {isNewBookingModalOpen && (
+        <NewBookings onClose={() => setIsNewBookingModalOpen(false)} />
+      )}
+
     </div>
   );
 }
