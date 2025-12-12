@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell } from "lucide-react";
+import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, User, LogOut, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
@@ -19,6 +19,7 @@ export default function CsrDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   useEffect(() => {
     // Get user data from localStorage
@@ -31,6 +32,17 @@ export default function CsrDashboard() {
         console.error('Error parsing user data:', error);
       }
     }
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown-container')) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const navItems = [
@@ -191,14 +203,66 @@ export default function CsrDashboard() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* Settings */}
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Settings className="w-6 h-6 text-gray-600" />
-            </button>
-
+            
             {/* User Avatar */}
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
-              C
+            <div className="relative profile-dropdown-container">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold hover:shadow-lg transition-shadow relative"
+              >
+                {user?.picture ? (
+                  <img 
+                    src={user.picture} 
+                    alt={user.name} 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'C'}</span>
+                )}
+                <ChevronDown className="absolute -bottom-1 -right-1 w-3 h-3 bg-white text-orange-500 rounded-full" />
+              </button>
+              
+              {/* Profile Dropdown */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
+                        {user?.picture ? (
+                          <img 
+                            src={user.picture} 
+                            alt={user.name} 
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'C'}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {user?.name || 'CSR Account'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.email || 'Loading...'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="py-1">
+                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                      <User className="w-4 h-4" />
+                      View Profile
+                    </button>
+                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                      <Settings className="w-4 h-4" />
+                      Settings
+                    </button>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <CsrLogout sidebar={false} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
