@@ -4,6 +4,7 @@ import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
+import ProfilePage from "./ProfilePage";
 
 interface AdminUser {
   id: string;
@@ -250,7 +251,13 @@ export default function CsrDashboard() {
                   </div>
                   
                   <div className="py-1">
-                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                    <button 
+                      onClick={() => {
+                        setPage("profile");
+                        setProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    >
                       <User className="w-4 h-4" />
                       View Profile
                     </button>
@@ -277,6 +284,7 @@ export default function CsrDashboard() {
             {page === "cleaners" && <CleanersPlaceholder />}
             {page === "deposits" && <DepositsPlaceholder />}
             {page === "inventory" && <InventoryPlaceholder />}
+            {page === "profile" && <ProfilePage user={user} onClose={() => setPage("dashboard")} />}
           </div>
         </div>
 
