@@ -21,7 +21,7 @@ export interface Employee {
   updated_at?: string;
 }
 
-// /api/employees/route.ts
+// CREATE Employee
 export const createEmployee = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const body = await req.json();
@@ -79,6 +79,148 @@ export const createEmployee = async (req: NextRequest): Promise<NextResponse> =>
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create employee',
+    }, { status: 500 });
+  }
+};
+
+// GET All Employees
+export const getAllEmployees = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const role = searchParams.get('role');
+
+    let query = 'SELECT * FROM employees';
+    let values: any[] = [];
+
+    if (role) {
+      query += ' WHERE role = $1';
+      values.push(role);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const result = await pool.query(query, values);
+    console.log(`✅ Retrieved ${result.rows.length} employees`);
+
+    return NextResponse.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length,
+    });
+
+  } catch (error: any) {
+    console.log('❌ Error getting employees:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to get employees',
+    }, { status: 500 });
+  }
+};
+
+// UPDATE Employee
+export const updateEmployee = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const body = await req.json();
+    const { id, ...employeeData } = body;
+
+    if (!id) {
+      return NextResponse.json({
+        success: false,
+        error: 'Employee ID is required',
+      }, { status: 400 });
+    }
+
+    const fields: string[] = [];
+    const values: any[] = [];
+    let paramCount = 1;
+
+    Object.entries(employeeData).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'id') {
+        fields.push(`${key} = $${paramCount}`);
+        values.push(value);
+        paramCount++;
+      }
+    });
+
+    if (fields.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'No fields to update',
+      }, { status: 400 });
+    }
+
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const query = `
+      UPDATE employees
+      SET ${fields.join(', ')}
+      WHERE id = $${paramCount}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Employee not found',
+      }, { status: 404 });
+    }
+
+    console.log('✅ Employee updated:', result.rows[0]);
+
+    return NextResponse.json({
+      success: true,
+      data: result.rows[0],
+      message: 'Employee updated successfully',
+    });
+
+  } catch (error: any) {
+    console.log('❌ Error updating employee:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to update employee',
+    }, { status: 500 });
+  }
+};
+
+// DELETE Employee
+export const deleteEmployee = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({
+        success: false,
+        error: 'Employee ID is required',
+      }, { status: 400 });
+    }
+
+    const query = `DELETE FROM employees WHERE id = $1 RETURNING *`;
+    const result = await pool.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Employee not found',
+      }, { status: 404 });
+    }
+
+    console.log('✅ Employee deleted:', result.rows[0]);
+
+    return NextResponse.json({
+      success: true,
+      data: result.rows[0],
+      message: 'Employee deleted successfully',
+    });
+
+  } catch (error: any) {
+    console.log('❌ Error deleting employee:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to delete employee',
     }, { status: 500 });
   }
 };

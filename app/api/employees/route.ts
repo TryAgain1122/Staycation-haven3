@@ -7,8 +7,6 @@ interface RequestContext {};
 
 const router = createEdgeRouter<NextRequest, RequestContext>();
 
-dbConnct;
-
 router.post(createEmployee);
 
 export async function POST (request: NextRequest, ctx: RequestContext):Promise<NextResponse> {

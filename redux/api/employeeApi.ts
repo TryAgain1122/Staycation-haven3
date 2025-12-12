@@ -17,7 +17,7 @@ export const employeeApi = createApi({
         createEmployee: builder.mutation({
             query(body) {
                 return {
-                    url: "/employee",
+                    url: "/employees",
                     method: "POST",
                     body
                 }
