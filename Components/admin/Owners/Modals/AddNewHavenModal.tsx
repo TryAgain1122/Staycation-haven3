@@ -25,6 +25,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
     tower: "",
     floor: "",
     view: "",
+    capacity: "",
+    roomSize: "",
+    beds: "",
     sixHourRate: "",
     tenHourRate: "",
     weekdayRate: "",
@@ -549,6 +552,111 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                       ))}
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Haven Details */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                  Haven Details
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      type="number"
+                      label="Maximum Guests *"
+                      placeholder="e.g., 4"
+                      labelPlacement="outside"
+                      min={1}
+                      max={20}
+                      value={formData.capacity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, capacity: e.target.value })
+                      }
+                      isRequired
+                      classNames={{
+                        base: "w-full",
+                        label: "text-sm font-medium text-gray-700 mb-1",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      label="Room Size (sq.m) *"
+                      placeholder="e.g., 45"
+                      labelPlacement="outside"
+                      value={formData.roomSize}
+                      onChange={(e) =>
+                        setFormData({ ...formData, roomSize: e.target.value })
+                      }
+                      isRequired
+                      classNames={{
+                        base: "w-full",
+                        label: "text-sm font-medium text-gray-700 mb-1",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Input
+                    type="text"
+                    label="Beds Configuration *"
+                    placeholder="e.g., 1 King + 1 Queen Bed"
+                    labelPlacement="outside"
+                    value={formData.beds}
+                    onChange={(e) =>
+                      setFormData({ ...formData, beds: e.target.value })
+                    }
+                    isRequired
+                    classNames={{
+                      base: "w-full",
+                      label: "text-sm font-medium text-gray-700 mb-1",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    placeholder="Enter a detailed description of the haven..."
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    rows={4}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                  Amenities
+                </h3>
+                <p className="text-sm text-gray-600">Select all amenities available in this haven</p>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {amenitiesList.map((amenity) => (
+                    <Checkbox
+                      key={amenity.key}
+                      isSelected={formData.amenities[amenity.key as keyof typeof formData.amenities]}
+                      onValueChange={(checked) =>
+                        handleAmenityChange(amenity.key, checked)
+                      }
+                      classNames={{
+                        label: "text-sm text-gray-700",
+                      }}
+                    >
+                      {amenity.label}
+                    </Checkbox>
+                  ))}
                 </div>
               </div>
 

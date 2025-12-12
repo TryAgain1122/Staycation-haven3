@@ -1,0 +1,19 @@
+CREATE TYPE employee_role AS ENUM ('Owner','CSR','Cleaner','Partner');
+
+CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    employment_id VARCHAR(50) UNIQUE NOT NULL,
+    hire_date DATE NOT NULL,
+    role employee_role NOT NULL,
+    department VARCHAR(100),
+    monthly_salary NUMERIC(10,2),
+    street_address TEXT,
+    city VARCHAR(100),
+    zip_code VARCHAR(20),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);

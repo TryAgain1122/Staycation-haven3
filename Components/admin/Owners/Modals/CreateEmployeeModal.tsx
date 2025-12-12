@@ -2,10 +2,12 @@
 
 import { X } from "lucide-react";
 import { useState } from "react";
-import {Input} from "@nextui-org/input";
+import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { DatePicker } from "@nextui-org/date-picker";
 import { parseDate } from "@internationalized/date";
+import { useCreateEmployeeMutation } from "@/redux/api/employeeApi";
+import toast from "react-hot-toast";
 
 interface CreateEmployeeModalProps {
   isOpen: boolean;
@@ -13,6 +15,8 @@ interface CreateEmployeeModalProps {
 }
 
 const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
+  const [createEmployee, { isLoading }] = useCreateEmployeeMutation();
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,13 +36,10 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
   });
 
   const roles = [
-    { value: "csr", label: "Customer Service Representative" },
-    { value: "cleaner", label: "Cleaner" },
-    { value: "partner", label: "Partner" },
-    { value: "manager", label: "Manager" },
-    { value: "supervisor", label: "Supervisor" },
-    { value: "receptionist", label: "Receptionist" },
-    { value: "maintenance", label: "Maintenance Staff" },
+    { value: "Owner", label: "Owner" },
+    { value: "Csr", label: "Customer Service Representative" },
+    { value: "Cleaner", label: "Cleaner" },
+    { value: "Partner", label: "Partner" },
   ];
 
   const departments = [
@@ -49,11 +50,52 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
     { value: "customer-service", label: "Customer Service" },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form data:", formData);
-    onClose();
+
+    try {
+      const employeeData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        employment_id: formData.employeeId,
+        hire_date: formData.hireDate,
+        role: formData.role,
+        department: formData.department,
+        monthly_salary: parseFloat(formData.salary),
+        street_address: formData.address,
+        city: formData.city,
+        zip_code: formData.zipCode,
+      };
+
+      const result = await createEmployee(employeeData).unwrap();
+
+      if (result.success) {
+        toast.success("Employee created successfully!");
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          employeeId: "",
+          role: "",
+          department: "",
+          hireDate: "",
+          salary: "",
+          address: "",
+          city: "",
+          zipCode: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+          emergencyContactRelation: "",
+        });
+        onClose();
+      }
+    } catch (error: any) {
+      console.error("Error creating employee: ", error);
+      toast.error("Error creating employee: ", error);
+    }
   };
 
   if (!isOpen) return null;
@@ -245,7 +287,9 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                       label="Department *"
                       placeholder="Select a department"
                       labelPlacement="outside"
-                      selectedKeys={formData.department ? [formData.department] : []}
+                      selectedKeys={
+                        formData.department ? [formData.department] : []
+                      }
                       onSelectionChange={(keys) => {
                         const selectedValue = Array.from(keys)[0] as string;
                         setFormData({ ...formData, department: selectedValue });
@@ -433,7 +477,7 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
               onClick={handleSubmit}
               className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium transition-colors shadow-md hover:shadow-lg"
             >
-              Create Employee
+              {isLoading ? "Creating..." : "Create Employee"}
             </button>
           </div>
         </div>
