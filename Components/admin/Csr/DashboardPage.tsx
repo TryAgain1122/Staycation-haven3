@@ -12,43 +12,39 @@ export default function DashboardPage() {
             title: "Total Bookings",
             value: "156",
             Icon: Calendar,
-            color: "bg-blue-500",
-            trend: "+12%"
+            color: "bg-blue-500"
           },
           {
             title: "Pending Payments",
             value: "₱45,000",
             Icon: DollarSign,
-            color: "bg-green-500",
-            trend: "+8%"
+            color: "bg-green-500"
           },
           {
             title: "Active Cleaners",
             value: "24",
             Icon: Users,
-            color: "bg-orange-500",
-            trend: "+3"
+            color: "bg-orange-500"
           },
           {
             title: "Total Deposits",
             value: "₱120,000",
             Icon: CreditCard,
-            color: "bg-purple-500",
-            trend: "+15%"
+            color: "bg-purple-500"
           },
         ].map((kpi, i) => {
           const IconComponent = kpi.Icon;
           return (
             <div
               key={i}
-              className={`${kpi.color} text-white rounded-lg p-6 shadow hover:shadow-lg animate-in fade-in slide-in-from-bottom duration-500`}
-              style={{ animationDelay: `${i * 100}ms` }}
+              className={`${kpi.color} text-white rounded-lg p-6 shadow hover:shadow-lg transition-all`}
             >
-              <p className="text-sm opacity-90">{kpi.title}</p>
-              <p className="text-3xl font-bold mt-2">{kpi.value}</p>
-              <div className="flex items-center justify-between mt-2">
-                <IconComponent className="w-8 h-8" />
-                <span className="text-sm opacity-90">{kpi.trend}</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-90">{kpi.title}</p>
+                  <p className="text-3xl font-bold mt-2">{kpi.value}</p>
+                </div>
+                <IconComponent className="w-12 h-12 opacity-50" />
               </div>
             </div>
           );
@@ -245,23 +241,7 @@ export default function DashboardPage() {
   );
 }
 
-export function BookingsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Calendar className="w-12 h-12 text-blue-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Bookings</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage all customer bookings and reservations here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as BookingsPage } from "./BookingPage";
 
 export function PaymentsPage() {
   return (
