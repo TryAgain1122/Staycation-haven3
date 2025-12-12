@@ -1,7 +1,7 @@
-import CsrDashboard from "@/Components/admin/Csr/CsrDashboardPage";
+import ProtectedCsrRoute from "@/Components/admin/Csr/Auth/ProtectedCsrRoute";
 
 const CsrPage = () => {
-  return <CsrDashboard />;
+  return <ProtectedCsrRoute />;
 };
 
 export default CsrPage;
