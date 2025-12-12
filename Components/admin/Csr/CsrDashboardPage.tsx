@@ -1,12 +1,37 @@
 "use client";
 
-import { LogOut, Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import CsrLogout from "./Auth/CsrLogout";
+
+interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  picture?: string;
+}
 
 export default function CsrDashboard() {
+  const router = useRouter();
   const [sidebar, setSidebar] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
+  const [user, setUser] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const adminUserData = localStorage.getItem('adminUser');
+    if (adminUserData) {
+      try {
+        const userData = JSON.parse(adminUserData);
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   const navItems = [
     { id: "dashboard", icon: Home, label: "Dashboard", color: "text-blue-500" },
@@ -107,23 +132,20 @@ export default function CsrDashboard() {
             <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                  C
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    CSR Account
+                    {user?.name || 'CSR Account'}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    csr@staycation.com
+                    {user?.email || 'Loading...'}
                   </p>
                 </div>
               </div>
             </div>
           )}
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all font-medium">
-            <LogOut className="w-5 h-5" />
-            {sidebar && <span className="text-sm">Logout</span>}
-          </button>
+          <CsrLogout sidebar={sidebar} />
         </div>
       </div>
 
