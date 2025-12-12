@@ -1,9 +1,7 @@
-'use client'
+import CsrDashboard from "@/Components/admin/Csr/CsrDashboardPage";
 
 const CsrPage = () => {
-  return (
-    <div>page</div>
-  )
-}
+  return <CsrDashboard />;
+};
 
-export default CsrPage
+export default CsrPage;

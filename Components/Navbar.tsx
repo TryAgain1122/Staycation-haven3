@@ -46,6 +46,10 @@ const Navbar = () => {
     return null;
   }
 
+  if (pathname === "/admin/csr") {
+    return null;
+  }
+
   return (
     <nav className="fixed w-full h-16 px-6 bg-white z-50">
       <div className="h-full flex items-center justify-between max-w-7xl mx-auto">
