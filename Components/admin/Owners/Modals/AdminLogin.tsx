@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface LoginFormState {
   email: string;
@@ -22,6 +23,7 @@ interface LoginFormState {
 }
 
 const AdminLogin = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<LoginFormState>({
     email: "",
     password: "",
@@ -39,7 +41,7 @@ const AdminLogin = () => {
     }));
   };
 
-  const handleLogin = (e: React.MouseEvent) => {
+  const handleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
@@ -65,15 +67,67 @@ const AdminLogin = () => {
       error: "",
     }));
 
-    setTimeout(() => {
-      toast.success(`Welcome!\nLogging in as ${formData.email}`);
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || "Login failed";
+
+        setFormData((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+        toast.error(errorMessage);
+        console.error('Login failed:', data);
+        return;
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem('adminUser', JSON.stringify(data.user));
+
+      // Success - redirect based on role
+      toast.success(`Welcome back, ${data.user.name || data.user.email}!`);
+
+      // Redirect based on user role
+      switch (data.user.role) {
+        case 'Csr':
+          router.push('/admin/csr');
+          break;
+        case 'Owner':
+          router.push('/admin/owners');
+          break;
+        case 'Partner':
+          router.push('/admin/partners');
+          break;
+        case 'Cleaner':
+          router.push('/admin/cleaners');
+          break;
+        default:
+          router.push('/admin/owners');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setFormData((prev) => ({
         ...prev,
         isLoading: false,
-        email: "",
-        password: "",
+        error: "An error occurred. Please try again.",
       }));
-    }, 1500);
+      toast.error("An error occurred. Please try again.");
+    }
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
