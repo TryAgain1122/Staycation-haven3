@@ -4,9 +4,9 @@ import { X, Upload, Trash2, Calendar, Clock, Plus } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
-import { Textarea } from "@nextui-org/input";
 import { Checkbox } from "@nextui-org/checkbox";
-
+import { useCreateHavenMutation } from "@/redux/api/roomApi"
+import toast from 'react-hot-toast';
 interface AddNewHavenModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,6 +20,7 @@ interface BlockedDate {
 }
 
 const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
+  const [createHaven, { isLoading}] = useCreateHavenMutation();
   const [formData, setFormData] = useState({
     havenName: "",
     tower: "",
@@ -61,6 +62,20 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
   });
 
   const [havenImages, setHavenImages] = useState<File[]>([]);
+
+  const [photoTourImages, setPhotoTourImages] = useState<
+    Record<string, File[]>
+  >({
+    livingArea: [],
+    kitchenette: [],
+    diningArea: [],
+    fullBathroom: [],
+    garage: [],
+    exterior: [],
+    pool: [],
+    bedroom: [],
+    additional: [],
+  });
 
   const towers = [
     { value: "tower-a", label: "Tower A" },
@@ -104,13 +119,128 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
     { key: "additional", label: "Additional Photos" },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form data:", formData);
-    console.log("Blocked dates:", blockedDates);
-    console.log("Haven images:", havenImages);
-    onClose();
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    // Convert haven images to base64
+    const havenImagesBase64 = await Promise.all(
+      havenImages.map((file) => {
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      })
+    );
+
+    // Convert photo tour images to base64
+    const photoTourBase64: Record<string, string[]> = {};
+    for (const [category, files] of Object.entries(photoTourImages)) {
+      if (files.length > 0) {
+        photoTourBase64[category] = await Promise.all(
+          files.map((file) => {
+            return new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+          })
+        );
+      }
+    }
+
+    // Prepare haven data
+    const havenData = {
+      haven_name: formData.havenName,
+      tower: formData.tower,
+      floor: formData.floor,
+      view_type: formData.view,
+      capacity: parseInt(formData.capacity),
+      room_size: parseFloat(formData.roomSize),
+      beds: formData.beds,
+      description: formData.description,
+      youtube_url: formData.youtubeUrl,
+      six_hour_rate: parseFloat(formData.sixHourRate),
+      ten_hour_rate: parseFloat(formData.tenHourRate),
+      weekday_rate: parseFloat(formData.weekdayRate),
+      weekend_rate: parseFloat(formData.weekendRate),
+      six_hour_check_in: formData.sixHourCheckIn + ":00",
+      ten_hour_check_in: formData.tenHourCheckIn + ":00",
+      twenty_one_hour_check_in: formData.twentyOneHourCheckIn + ":00",
+      amenities: formData.amenities,
+      haven_images: havenImagesBase64,
+      photo_tour_images: photoTourBase64,
+      blocked_dates: blockedDates.map(date => ({
+        from_date: date.fromDate,
+        to_date: date.toDate,
+        reason: date.reason
+      }))
+    };
+
+    const result = await createHaven(havenData).unwrap();
+
+    if (result.success) {
+      toast.success("Haven created successfully!");
+      
+      // Reset form
+      setFormData({
+        havenName: "",
+        tower: "",
+        floor: "",
+        view: "",
+        capacity: "",
+        roomSize: "",
+        beds: "",
+        sixHourRate: "",
+        tenHourRate: "",
+        weekdayRate: "",
+        weekendRate: "",
+        sixHourCheckIn: "09:00",
+        tenHourCheckIn: "09:00",
+        twentyOneHourCheckIn: "14:00",
+        description: "",
+        youtubeUrl: "",
+        amenities: {
+          wifi: false,
+          netflix: false,
+          ps4: false,
+          glowBed: false,
+          airConditioning: false,
+          kitchen: false,
+          balcony: false,
+          tv: false,
+          poolAccess: false,
+          parking: false,
+          washerDryer: false,
+          towels: false,
+        },
+      });
+      setHavenImages([]);
+      setPhotoTourImages({
+        livingArea: [],
+        kitchenette: [],
+        diningArea: [],
+        fullBathroom: [],
+        garage: [],
+        exterior: [],
+        pool: [],
+        bedroom: [],
+        additional: [],
+      });
+      setBlockedDates([]);
+      
+      onClose();
+    }
+  } catch (error: any) {
+    console.error("Error creating haven:", error);
+    const errorMessage =
+      error?.data?.error || error?.message || "Failed to create haven";
+    toast.error(errorMessage);
+  }
+}
 
   const handleAmenityChange = (key: string, checked: boolean) => {
     setFormData({
@@ -148,6 +278,26 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
 
   const handleRemoveImage = (index: number) => {
     setHavenImages(havenImages.filter((_, i) => i !== index));
+  };
+
+  const handlePhotoTourUpload = (
+    category: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setPhotoTourImages({
+        ...photoTourImages,
+        [category]: [...photoTourImages[category], ...filesArray],
+      });
+    }
+  };
+
+  const handleRemovePhotoTourImage = (category: string, index: number) => {
+    setPhotoTourImages({
+      ...photoTourImages,
+      [category]: photoTourImages[category].filter((_, i) => i !== index),
+    });
   };
 
   if (!isOpen) return null;
@@ -276,7 +426,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                   Pricing Management
                 </h3>
 
-                <p className="text-sm font-semibold text-gray-700">Weekday Rates</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  Weekday Rates
+                </p>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Input
@@ -343,7 +495,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                   </div>
                 </div>
 
-                <p className="text-sm font-semibold text-gray-700 mt-4">Weekend Rates</p>
+                <p className="text-sm font-semibold text-gray-700 mt-4">
+                  Weekend Rates
+                </p>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Input
@@ -369,7 +523,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                  <p className="text-sm text-blue-800 font-medium mb-2">Pricing Notes</p>
+                  <p className="text-sm text-blue-800 font-medium mb-2">
+                    Pricing Notes
+                  </p>
                   <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
                     <li>6h & 10h rates: Weekdays only</li>
                     <li>21h rate: Available weekdays</li>
@@ -383,7 +539,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                 <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
                   Check-in Time Settings
                 </h3>
-                <p className="text-sm text-gray-600">Set default check-in times for each booking duration</p>
+                <p className="text-sm text-gray-600">
+                  Set default check-in times for each booking duration
+                </p>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
@@ -448,7 +606,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                 <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
                   Availability Management
                 </h3>
-                <p className="text-sm font-semibold text-gray-700">Block Dates</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  Block Dates
+                </p>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
@@ -516,13 +676,19 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                   Block Dates
                 </button>
 
-                <p className="text-xs text-gray-500">Blocked dates will not be available for booking</p>
+                <p className="text-xs text-gray-500">
+                  Blocked dates will not be available for booking
+                </p>
 
                 {/* Blocked Date Ranges List */}
                 <div className="mt-4">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Blocked Date Ranges</p>
+                  <p className="text-sm font-semibold text-gray-700 mb-2">
+                    Blocked Date Ranges
+                  </p>
                   {blockedDates.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">No blocked dates yet</p>
+                    <p className="text-sm text-gray-500 italic">
+                      No blocked dates yet
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {blockedDates.map((date) => (
@@ -537,7 +703,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                                 {date.fromDate} to {date.toDate}
                               </p>
                               {date.reason && (
-                                <p className="text-xs text-gray-500">{date.reason}</p>
+                                <p className="text-xs text-gray-500">
+                                  {date.reason}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -640,13 +808,19 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                 <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
                   Amenities
                 </h3>
-                <p className="text-sm text-gray-600">Select all amenities available in this haven</p>
+                <p className="text-sm text-gray-600">
+                  Select all amenities available in this haven
+                </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {amenitiesList.map((amenity) => (
                     <Checkbox
                       key={amenity.key}
-                      isSelected={formData.amenities[amenity.key as keyof typeof formData.amenities]}
+                      isSelected={
+                        formData.amenities[
+                          amenity.key as keyof typeof formData.amenities
+                        ]
+                      }
                       onValueChange={(checked) =>
                         handleAmenityChange(amenity.key, checked)
                       }
@@ -694,9 +868,11 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                         className="relative group border border-gray-200 rounded-lg overflow-hidden"
                       >
                         <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                          <p className="text-xs text-gray-500 p-2 text-center truncate">
-                            {file.name}
-                          </p>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <button
                           type="button"
@@ -717,7 +893,9 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                   Photo Tour Management
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Upload photos for each category to create a comprehensive photo tour. Images will be displayed in the photo gallery page.
+                  Upload photos for each category to create a comprehensive
+                  photo tour. Images will be displayed in the photo gallery
+                  page.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -734,6 +912,7 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                           type="file"
                           multiple
                           accept="image/*"
+                          onChange={(e) => handlePhotoTourUpload(category.key, e)}
                           className="hidden"
                           id={`photo-tour-${category.key}`}
                         />
@@ -745,7 +924,42 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
                           Upload
                         </label>
                       </label>
-                      <p className="text-xs text-gray-500 mt-2 italic">No photos yet</p>
+
+                      {/* Show uploaded images for this category */}
+                      {photoTourImages[category.key]?.length > 0 ? (
+                        <div className="mt-3 space-y-2">
+                          {photoTourImages[category.key].map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="w-10 h-10 object-cover rounded"
+                                />
+                                <p className="text-xs text-gray-600 truncate">
+                                  {file.name}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemovePhotoTourImage(category.key, index)
+                                }
+                                className="p-1 text-red-500 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500 mt-2 italic">
+                          No photos yet
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -791,7 +1005,7 @@ const AddNewHavenModal = ({ isOpen, onClose }: AddNewHavenModalProps) => {
               onClick={handleSubmit}
               className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 font-medium transition-colors shadow-md hover:shadow-lg"
             >
-              Save Changes
+              {isLoading ? "Creating Haven..." : "Save Changes"}
             </button>
           </div>
         </div>

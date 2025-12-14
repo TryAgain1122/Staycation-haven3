@@ -24,6 +24,7 @@
     "anxious": "^0.0.0-security",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.8.0",
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.555.0",
     "next": "^15.1.0",

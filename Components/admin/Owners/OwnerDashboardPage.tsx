@@ -12,10 +12,13 @@ import AddNewHavenModal from "./Modals/AddNewHavenModal";
 import PoliciesModal from "./Modals/PoliciesModal";
 import StaffActivityPage from "./StaffActivityPage";
 import ViewAllUnits from "./ViewAllUnits";
-import { useState } from "react";
+import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { signOut, useSession } from "next-auth/react";
 
 export default function OwnerDashboard() {
-  const [sidebar, setSidebar] = useState(true);
+  const { data: session} = useSession();
+   const [sidebar, setSidebar] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [havenView, setHavenView] = useState<"overview" | "list">("overview");
@@ -41,6 +44,38 @@ export default function OwnerDashboard() {
   const openModal = (modal: string) => setModals({ ...modals, [modal]: true });
   const closeModal = (modal: string) =>
     setModals({ ...modals, [modal]: false });
+
+  // Prevent back navigation to login page after login
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Push current state to history
+      window.history.pushState(null, '', window.location.href);
+
+      // Prevent back navigation
+      const handlePopState = () => {
+        window.history.pushState(null, '', window.location.href);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut({
+        callbackUrl: "/admin/login",
+        redirect: true
+      });
+      toast.success("Logged out successfully!")
+    } catch (error) {
+      console.error("Logout error: ", error);
+      toast.error("Failed to logout")
+    }
+  }
 
   const navItems = [
     { id: "dashboard", icon: Home, label: "Dashboard", color: "text-blue-500" },
@@ -101,6 +136,7 @@ export default function OwnerDashboard() {
                 </div>
               )}
             </div>
+
             {/* Mobile Close Button */}
             {mobileMenuOpen && (
               <button
@@ -157,16 +193,18 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    Owner Account
+                    {(session?.user.name || "User")}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    owner@staycation.com
+                    {(session?.user as any)?.role || "Owner"}
                   </p>
                 </div>
               </div>
             </div>
           )}
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all font-medium">
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all font-medium"
+          onClick={handleLogout}
+          >
             <LogOut className="w-5 h-5" />
             {sidebar && <span className="text-sm">Logout</span>}
           </button>

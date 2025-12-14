@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../config/db';
+import bcrypt from 'bcryptjs';
+import { upload_file } from '../utils/cloudinary';
 
 export type EmployeeRole = 'Owner' | 'Csr' | 'Cleaner' | 'Partner';
 
@@ -19,6 +21,8 @@ export interface Employee {
   zip_code?: string;
   created_at?: string;
   updated_at?: string;
+  password: string;
+  profile_image_url?: string;
 }
 
 // CREATE Employee
@@ -38,15 +42,25 @@ export const createEmployee = async (req: NextRequest): Promise<NextResponse> =>
       street_address,
       city,
       zip_code,
+      password,
+      profile_image
     } = body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let profileImageUrl = null;
+    if (profile_image) {
+      const uploadResult = await upload_file(profile_image, "staycation-haven/profiles");
+      profileImageUrl = uploadResult.url;
+    }
 
     const query = `
       INSERT INTO employees (
         first_name, last_name, email, phone, employment_id,
         hire_date, role, department, monthly_salary,
-        street_address, city, zip_code
+        street_address, city, zip_code, password, profile_image_url, created_at, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
       RETURNING *
     `;
 
@@ -63,6 +77,8 @@ export const createEmployee = async (req: NextRequest): Promise<NextResponse> =>
       street_address,
       city,
       zip_code,
+      hashedPassword,
+      profileImageUrl
     ];
 
     const result = await pool.query(query, values);
@@ -224,3 +240,72 @@ export const deleteEmployee = async (req: NextRequest): Promise<NextResponse> =>
     }, { status: 500 });
   }
 };
+
+//Login Employee 
+export const loginEmployee = async (req: NextRequest):Promise <NextResponse> => {
+  try {
+    const body = await req.json();
+    const { email, password } = body;
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { success: false, error: "Email and password are required"},
+        { status: 400 }
+      )
+    }
+
+    const findQuery = `SELECT id, first_name, last_name, email, password, role, department, profile_image_url FROM employees WHERE email = $1 LIMIT 1`;
+
+    const userResult = await pool.query(findQuery, [email]);
+
+    if (userResult.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email or password"},
+        { status: 401}
+      )
+    }
+
+    const employee = userResult.rows[0];
+
+    const isMatch = await bcrypt.compare(password, employee.password);
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email or password" },
+        { status: 401}
+      )
+    }
+
+    const adminRoles = ['Owner', 'Csr', 'Cleaner', 'Partner'];
+    
+    if (!adminRoles.includes(employee.role)) {
+      return NextResponse.json({
+        success: false, error: "You do not have admin access"
+      },
+      { status: 403 }
+    )
+    }
+
+    console.log("Employee logged in. ", employee.email)
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Login successfully",
+        user: {
+          id: employee.id,
+          email: employee.email,
+          name: `${employee.first_name} ${employee.last_name}`,
+          role: employee.role,
+          department: employee.department,
+          profile_image_url: employee.profile_image_url
+        }
+      },
+      { status: 200 }
+    )
+  } catch(error) {
+    console.log("Login failed")
+    return NextResponse.json({
+      success: false, error: "Login Failed"
+    })
+  }
+}

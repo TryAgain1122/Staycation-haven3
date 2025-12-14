@@ -25,9 +25,9 @@ interface Room {
 }
 interface RoomCardsProps {
   room: Room;
-  mode?: 'select' | 'browse'; // 'select' for filtered search, 'browse' for homepage
+  mode?: "select" | "browse"; // 'select' for filtered search, 'browse' for homepage
 }
-const RoomCard = ({ room, mode = 'browse' }: RoomCardsProps) => {
+const RoomCard = ({ room, mode = "browse" }: RoomCardsProps) => {
   const router = useRouter();
 
   const handleSelect = () => {
@@ -42,52 +42,54 @@ const RoomCard = ({ room, mode = 'browse' }: RoomCardsProps) => {
       {/* Content */}
       <div className="p-4 sm:p-6">
         {/* Rating and Revies */}
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, index) => (
-                <Star
-                  key={index}
-                  className={`w-4 h-4 ${
-                    index < Math.floor(room.rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-600">
-              {room.rating} ({room.reviews} reviews)
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, index) => (
+              <Star
+                key={index}
+                className={`w-4 h-4 ${
+                  index < Math.floor(room.rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+          <span className="text-sm text-gray-600">
+            {room.rating} ({room.reviews} reviews)
+          </span>
+        </div>
+
+        {/* Room Name */}
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">
+          {room.name}
+        </h3>
+
+        {/* Location */}
+        {room.location && room.tower && (
+          <div className="flex items-center gap-1 mb-2">
+            <MapPin className="w-4 h-4 text-orange-500" />
+            <span className="text-sm text-gray-600 font-medium">
+              {room.tower}, {room.location}
             </span>
           </div>
+        )}
 
-          {/* Room Name */}
-          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">
-            {room.name}
-          </h3>
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          {room.description}
+        </p>
 
-          {/* Location */}
-          {room.location && room.tower && (
-            <div className="flex items-center gap-1 mb-2">
-              <MapPin className="w-4 h-4 text-orange-500" />
-              <span className="text-sm text-gray-600 font-medium">
-                {room.tower}, {room.location}
-              </span>
-            </div>
-          )}
+        {/* Amenities */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(Array.isArray(room.amenities) ? room.amenities : [])
+            .slice(0, 2)
+            .map((amenity, index) => (
+              <AmenityBadge key={index} amenity={amenity} />
+            ))}
+        </div>
 
-          {/* Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {room.description}
-          </p>
-
-          {/* Amenities */}
-          <div className="flex flex-wrap gap-2 mb-4">
-              {room.amenities.slice(0, 2).map((amenity, index) => (
-                <AmenityBadge key={index} amenity={amenity}/>
-              ))}
-          </div>
-
-           {/* Capacity */}
+        {/* Capacity */}
         <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
           <User className="w-4 h-4 text-blue-600" />
           <span>Up to {room.capacity} guests</span>
@@ -104,7 +106,7 @@ const RoomCard = ({ room, mode = 'browse' }: RoomCardsProps) => {
           </div>
 
           {/* Conditional Button based on mode */}
-          {mode === 'select' ? (
+          {mode === "select" ? (
             // SELECT button for filtered search results
             <button
               onClick={handleSelect}
@@ -121,8 +123,8 @@ const RoomCard = ({ room, mode = 'browse' }: RoomCardsProps) => {
             </Link>
           )}
         </div>
-        </div>
       </div>
+    </div>
   );
 };
 

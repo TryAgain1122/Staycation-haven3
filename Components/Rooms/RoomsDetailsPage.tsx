@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowLeft, ChevronLeft, ChevronRight, Home, Mail, MapPin, Phone, Star, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Mail,
+  MapPin,
+  Phone,
+  Star,
+  Users,
+  X,
+  Play,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -24,6 +36,18 @@ interface Room {
   roomSize?: string;
   location?: string;
   tower?: string;
+  photoTour?: {
+    livingArea?: string[];
+    kitchenette?: string[];
+    diningArea?: string[];
+    fullBathroom?: string[];
+    garage?: string[];
+    exterior?: string[];
+    pool?: string[];
+    bedroom?: string[];
+    additional?: string[];
+  };
+  youtubeUrl?: string;
 }
 
 interface RoomsDetailsPageProps {
@@ -35,6 +59,36 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("Living Area");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState("");
+
+  // Photo tour categories
+  const photoTourCategories = [
+    "Living Area",
+    "Kitchenette",
+    "Dining Area",
+    "Full Bathroom",
+    "Garage",
+    "Exterior",
+    "Pool",
+    "Bedroom",
+    "Additional",
+  ];
+
+  // Map categories to room.photoTour keys
+  const photoTourData: Record<string, string[]> = {
+  "Living Area": room.photoTour?.livingArea || [],
+  "Kitchenette": room.photoTour?.kitchenette || [],
+  "Dining Area": room.photoTour?.diningArea || [],
+  "Full Bathroom": room.photoTour?.fullBathroom || [],
+  "Garage": room.photoTour?.garage || [],
+  "Exterior": room.photoTour?.exterior || [],
+  "Pool": room.photoTour?.pool || [],
+  "Bedroom": room.photoTour?.bedroom || [],
+  "Additional": room.photoTour?.additional || [],
+};
+
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % room.images.length);
@@ -46,17 +100,39 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
     );
   };
 
+  const openLightbox = (image: string) => {
+    setLightboxImage(image);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setLightboxImage("");
+  };
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return "";
+    const videoIdMatch = url.match(
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+    );
+    return videoIdMatch
+      ? `https://www.youtube.com/embed/${videoIdMatch[1]}`
+      : url;
+  };
+
   const handleBookNow = () => {
     // Save the selected room to Redux
-    dispatch(setSelectedRoom({
-      id: room.id,
-      name: room.name,
-      price: room.price,
-      pricePerNight: room.pricePerNight,
-      location: room.location,
-      tower: room.tower,
-    }));
-    router.push('/checkout');
+    dispatch(
+      setSelectedRoom({
+        id: room.id,
+        name: room.name,
+        price: room.price,
+        pricePerNight: room.pricePerNight,
+        location: room.location,
+        tower: room.tower,
+      })
+    );
+    router.push("/checkout");
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -87,7 +163,9 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
               {/* Images Slider */}
               <div
                 className="w-full h-full flex transition-transform duration-500"
-                style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                style={{
+                  transform: `translateX(-${currentImageIndex * 100}%)`,
+                }}
               >
                 {room.images.map((image, index) => (
                   <div
@@ -131,68 +209,160 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
 
             {/* Thumbnail gallery */}
             <div className="flex gap-2 overflow-x-auto pb-2">
-                {room.images.map((image, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                            index === currentImageIndex
-                            ? 'border-orange-500 scale-105'
-                            : 'border-gray-300 hover:border-orange-300'
-                        }`}
-                    >
-                        <Image
-                            src={image}
-                            alt={`Thumbnail ${index + 1}`}
-                            fill
-                            sizes="80px"
-                            className="object-cover"
-                        />
-                    </button>
-                ))}
+              {room.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                    index === currentImageIndex
+                      ? "border-orange-500 scale-105"
+                      : "border-gray-300 hover:border-orange-300"
+                  }`}
+                >
+                  <Image
+                    src={image}
+                    alt={`Thumbnail ${index + 1}`}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                </button>
+              ))}
             </div>
 
             {/* Description Section */}
-            <div className="mt-8 bg-white rounded-lg p-6 shaodow-md animate-in fade-in slide-in-from-bottom duration-500 "
-                style={{ animationDelay: '100ms'}}            
+            <div
+              className="mt-8 bg-white rounded-lg p-6 shaodow-md animate-in fade-in slide-in-from-bottom duration-500 "
+              style={{ animationDelay: "100ms" }}
             >
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    About This Room
-                </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                    {room.fullDescription || room.description}
-                </p>
-                <p className="text-gray-600">
-                    Experience ultimate comfort and luxury in this beautifully designed room. Perfect for both business and leisure travelers, this room offers everything you need for a memorable stay.
-                </p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                About This Room
+              </h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                {room.fullDescription || room.description}
+              </p>
+              <p className="text-gray-600">
+                Experience ultimate comfort and luxury in this beautifully
+                designed room. Perfect for both business and leisure travelers,
+                this room offers everything you need for a memorable stay.
+              </p>
             </div>
 
             {/* Amenities Section */}
-            <div className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in from-bottom duration-500"
-                style={{ animationDelay: '200ms'}}
+            <div
+              className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in from-bottom duration-500"
+              style={{ animationDelay: "200ms" }}
             >
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Room Amenities</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {room.amenities.map((amenity, index) => (
-                        <AmenityBadge key={index} amenity={amenity}/>
-                    ))}
-                </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                Room Amenities
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {room.amenities.map((amenity, index) => (
+                  <AmenityBadge key={index} amenity={amenity} />
+                ))}
+              </div>
             </div>
 
-            {/* Location and Map Section */}
-            <div className="mt-8 bg-white rounded-lg shadow-md overflow-hidden animate-in fade-in slide-in-from-bottom duration-500"
-                style={{ animationDelay: '300ms'}}
-            >
-                <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <MapPin className="w-6 h-6 text-orange-600" />
-                        Location
-                    </h2>
+            {/* Photo Tour Gallery */}
+            {room.photoTour && (
+              <div
+                className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+                style={{ animationDelay: "250ms" }}
+              >
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  Photo Tour
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Explore every corner of this haven
+                </p>
+
+                {/* Tab navigation for categories */}
+                <div className="flex gap-2 overflow-x-auto mb-6 pb-2">
+                  {photoTourCategories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
+                        activeCategory === category
+                          ? "bg-orange-500 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
                 </div>
 
-                {/* Map */}
-                <div className="w-full h-96 bg-gray-200 relative overflow-hidden">
-                    <iframe
+                {/* Photo grid for selected category */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {photoTourData[activeCategory]?.length > 0 ? (
+                    photoTourData[activeCategory].map((photo, index) => (
+                      <div
+                        key={index}
+                        onClick={() => openLightbox(photo)}
+                        className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group"
+                      >
+                        <Image
+                          src={photo}
+                          alt={`${activeCategory} ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      No photos available for this category
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* YouTube Video Section */}
+            {room.youtubeUrl && (
+              <div
+                className="mt-8 bg-white rounded-lg p-6 shadow-md animate-in fade-in slide-in-from-bottom duration-500"
+                style={{ animationDelay: "300ms" }}
+              >
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <Play className="w-6 h-6 text-orange-600" />
+                  Video Tour
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Watch a virtual tour of this beautiful room
+                </p>
+
+                {/* YouTube Video Embed */}
+                <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden">
+                  <iframe
+                    src={getYouTubeEmbedUrl(room.youtubeUrl)}
+                    className="absolute top-0 left-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="Room Video Tour"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Location and Map Section */}
+            <div
+              className="mt-8 bg-white rounded-lg shadow-md overflow-hidden animate-in fade-in slide-in-from-bottom duration-500"
+              style={{ animationDelay: "300ms" }}
+            >
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-orange-600" />
+                  Location
+                </h2>
+              </div>
+
+              {/* Map */}
+              <div className="w-full h-96 bg-gray-200 relative overflow-hidden">
+                <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.5889374956847!2d121.03087197584714!3d14.639809577537995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b603c2fec51b%3A0xdf26cdeed4a6fa95!2sStaycation%20Haven%20PH%20Quezon%20City!5e0!3m2!1sen!2sph!4v1234567890123"
                   width="100%"
                   height="100%"
@@ -202,99 +372,133 @@ const RoomsDetailsPage = ({ room, onBack }: RoomsDetailsPageProps) => {
                   referrerPolicy="no-referrer-when-downgrade"
                   className="w-full h-full"
                 />
+              </div>
+
+              {/* Hotel Info */}
+              <div className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold text-gray-800">Address</h3>
+                    <p className="text-gray-600">
+                      Staycation Haven PH, Quezon City, Metro Manila,
+                      Philippines
+                    </p>
+                  </div>
                 </div>
 
-                {/* Hotel Info */}
-                <div className="p-5 space-y-4">
-                    <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1"/>
-                        <div>
-                            <h3 className="font-semibold text-gray-800">Address</h3>
-                            <p className="text-gray-600">Staycation Haven PH, Quezon City, Metro Manila, Philippines</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                        <Phone className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1"/>
-                        <div>
-                            <h3 className="font-semibold text-gray-800">Phone</h3>
-                            <p className="text-gray-600">+63 9232457609</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                        <Mail className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1"/>
-                        <div>
-                            <h3 className="font-semibold text-gray-800">Email</h3>
-                            <p className="text-gray-600">info@staycationhaven.ph</p>
-                        </div>
-                    </div>
+                <div className="flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold text-gray-800">Phone</h3>
+                    <p className="text-gray-600">+63 9232457609</p>
+                  </div>
                 </div>
+
+                <div className="flex items-start gap-3">
+                  <Mail className="w-5 h-5 text-orange-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold text-gray-800">Email</h3>
+                    <p className="text-gray-600">info@staycationhaven.ph</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        
-         {/* Right Column Details and Booking */}
-         <div className="animate-fade-in slide-in-from-right duration-500">
+
+          {/* Right Column Details and Booking */}
+          <div className="animate-fade-in slide-in-from-right duration-500">
             {/* Price Card */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6 sticky top-24">
-                {/* Rating */}
-                <div className="flex items-start gap-2 mb-4">
-                    <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, index) => (
-                            <Star 
-                                key={index}
-                                className={`w-5 h-5 ${
-                                    index < Math.floor(room.rating)
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-800'
-                                }`}
-                            />
-                        ))}
-                    </div>
-                    <span className="text-sm text-gray-600">
-                        {room.rating} ({room.reviews} reviews)
-                    </span>
+              {/* Rating */}
+              <div className="flex items-start gap-2 mb-4">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`w-5 h-5 ${
+                        index < Math.floor(room.rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-800"
+                      }`}
+                    />
+                  ))}
                 </div>
+                <span className="text-sm text-gray-600">
+                  {room.rating} ({room.reviews} reviews)
+                </span>
+              </div>
 
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">{room.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-6">
+                {room.name}
+              </h1>
 
+              {/* Price */}
+              <div className="mb-6 pb-6 border-b border-gray-200">
+                <p>Starting Price</p>
+                <p className="text-sm text-gray-500 mb-2">{room.price}</p>
+                <p className="text-sm text-gray-500">{room.pricePerNight}</p>
+              </div>
 
-                {/* Price */}
-                <div className="mb-6 pb-6 border-b border-gray-200">
-                    <p>Starting Price</p>
-                    <p className="text-sm text-gray-500 mb-2">{room.price}</p>
-                    <p className="text-sm text-gray-500">{room.pricePerNight}</p>
+              {/* Room Details */}
+              <div className="mb-4 pb-4 border-b border-gray-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  <span className="text-gray-700">
+                    Up to {room.capacity} guests
+                  </span>
                 </div>
+                {room.beds && (
+                  <div className="flex items-center gap-3">
+                    <Home className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700">{room.roomSize}</span>
+                  </div>
+                )}
+              </div>
 
-                {/* Room Details */}
-                <div className="mb-4 pb-4 border-b border-gray-200 space-y-3">
-                    <div className="flex items-center gap-3">
-                        <Users className="w-5 h-5 text-blue-600"/>
-                        <span className="text-gray-700">Up to {room.capacity} guests</span>
-                    </div>
-                    {room.beds && (
-                      <div className="flex items-center gap-3">
-                        <Home className="w-5 h-5 text-blue-600" />
-                        <span className="text-gray-700">{room.roomSize}</span>
-                      </div>
-                    )}
-                </div>
-
-                  {/* Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={handleBookNow}
-                    className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 text-lg shadow-lg hover:shadow-xl"
-                  >
-                    Book Now
-                  </button>
-                  <button className="w-full border-2 border-gray-300 hover:border-orange-500 text-gray-800 hover:text-orange-600 font-semibold py-3 rounded-lg transition-all duration-300">Add to Wishlist</button>
-                </div>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleBookNow}
+                  className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 text-lg shadow-lg hover:shadow-xl"
+                >
+                  Book Now
+                </button>
+                <button className="w-full border-2 border-gray-300 hover:border-orange-500 text-gray-800 hover:text-orange-600 font-semibold py-3 rounded-lg transition-all duration-300">
+                  Add to Wishlist
+                </button>
+              </div>
             </div>
-         </div>
-
+          </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <div
+            className="relative max-w-7xl max-h-[90vh] w-full h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={lightboxImage}
+              alt="Fullscreen view"
+              fill
+              sizes="100vw"
+              className="object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
