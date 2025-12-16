@@ -18,6 +18,7 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import AddItem from "./Modals/AddItem";
 
 type InventoryStatus = "In Stock" | "Low Stock" | "Out of Stock";
 
@@ -47,6 +48,7 @@ const formatCurrency = (value: number) => {
 };
 
 export default function InventoryPage() {
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | InventoryStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -160,12 +162,39 @@ export default function InventoryPage() {
         </div>
         <button
           type="button"
+          onClick={() => setIsAddItemOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all font-semibold shadow-[rgba(186,144,60,0.35)]"
         >
           <Plus className="w-5 h-5" />
           Add Item
         </button>
       </div>
+
+      {isAddItemOpen && (
+        <AddItem
+          onClose={() => setIsAddItemOpen(false)}
+          onAdd={(item) => {
+            const statusColor =
+              item.status === "In Stock"
+                ? "bg-green-100 text-green-700"
+                : item.status === "Low Stock"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700";
+
+            setRows((prev) => [
+              {
+                item_id: `IT-${String(prev.length + 1).padStart(3, "0")}`,
+                name: item.name,
+                stock: item.stock,
+                price: item.price,
+                status: item.status,
+                statusColor,
+              },
+              ...prev,
+            ]);
+          }}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
