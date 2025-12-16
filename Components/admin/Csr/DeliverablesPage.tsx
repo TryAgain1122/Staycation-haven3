@@ -5,6 +5,7 @@ import {
   Search,
   Filter,
   ArrowUpDown,
+  MapPin,
   User,
   CheckCircle,
   Clock,
@@ -31,6 +32,7 @@ type DeliverableStatus = "Pending" | "Prepared" | "Delivered" | "Cancelled";
 interface DeliverableRow {
   deliverables_id: string;
   guest: string;
+  haven: string;
   checkin: string;
   checkout: string;
   status: DeliverableStatus;
@@ -59,6 +61,7 @@ export default function DeliverablesPage() {
     {
       deliverables_id: "DL-001",
       guest: "John Smith",
+      haven: "Haven 2",
       checkin: "2024-03-15 15:00",
       checkout: "2024-03-20 11:00",
       status: "Prepared",
@@ -68,6 +71,7 @@ export default function DeliverablesPage() {
     {
       deliverables_id: "DL-002",
       guest: "Sarah Johnson",
+      haven: "Haven 1",
       checkin: "2024-03-18 14:00",
       checkout: "2024-03-22 11:00",
       status: "Pending",
@@ -77,6 +81,7 @@ export default function DeliverablesPage() {
     {
       deliverables_id: "DL-003",
       guest: "Mike Wilson",
+      haven: "Haven 3",
       checkin: "2024-03-20 15:00",
       checkout: "2024-03-25 11:00",
       status: "Delivered",
@@ -86,6 +91,7 @@ export default function DeliverablesPage() {
     {
       deliverables_id: "DL-004",
       guest: "Emily Brown",
+      haven: "Haven 4",
       checkin: "2024-03-22 15:00",
       checkout: "2024-03-27 11:00",
       status: "Pending",
@@ -95,6 +101,7 @@ export default function DeliverablesPage() {
     {
       deliverables_id: "DL-005",
       guest: "David Lee",
+      haven: "Haven 2",
       checkin: "2024-03-25 15:00",
       checkout: "2024-03-30 11:00",
       status: "Cancelled",
@@ -263,7 +270,7 @@ export default function DeliverablesPage() {
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px]">
+          <table className="w-full min-w-[1250px]">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
               <tr>
                 <th
@@ -281,6 +288,15 @@ export default function DeliverablesPage() {
                 >
                   <div className="flex items-center gap-2">
                     Guest
+                    <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("haven")}
+                  className="text-left py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors group whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    Haven
                     <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
                   </div>
                 </th>
@@ -325,6 +341,12 @@ export default function DeliverablesPage() {
                     <div className="flex items-center gap-2 min-w-[180px]">
                       <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <span className="font-semibold text-gray-800 text-sm">{row.guest}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                      <span className="text-sm font-medium text-gray-700 whitespace-nowrap">{row.haven}</span>
                     </div>
                   </td>
                   <td className="py-4 px-4">
