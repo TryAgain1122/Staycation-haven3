@@ -11,6 +11,7 @@ interface Notification {
   description: string;
   timestamp: string;
   type: NotificationType;
+  read: boolean;
 }
 
 interface NotificationPageProps {
@@ -24,6 +25,7 @@ const mockNotifications: Notification[] = [
     description: "A new booking for Haven 2 requires CSR confirmation.",
     timestamp: "2 mins ago",
     type: "info",
+    read: false,
   },
   {
     id: "2",
@@ -31,6 +33,7 @@ const mockNotifications: Notification[] = [
     description: "₱12,500 from Emily Brown was confirmed.",
     timestamp: "15 mins ago",
     type: "success",
+    read: false,
   },
   {
     id: "3",
@@ -38,6 +41,7 @@ const mockNotifications: Notification[] = [
     description: "Mike Wilson will arrive today at 3:00 PM.",
     timestamp: "1 hr ago",
     type: "warning",
+    read: true,
   },
   {
     id: "4",
@@ -45,6 +49,7 @@ const mockNotifications: Notification[] = [
     description: "Housekeeping restocked linens for Haven 1.",
     timestamp: "2 hrs ago",
     type: "info",
+    read: true,
   },
 ];
 
@@ -61,7 +66,11 @@ const badgeStyles: Record<NotificationType, string> = {
 };
 
 export default function NotificationPage({ onClose }: NotificationPageProps) {
-  const [notifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const visibleNotifications = filter === "unread" ? notifications.filter((n) => !n.read) : notifications;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
@@ -82,57 +91,86 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <div className="flex flex-wrap gap-6">
-          <div className="flex-1 min-w-[220px]">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">
-              Overview
-            </p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{notifications.length}</p>
-            <p className="text-sm text-gray-500">Total notifications</p>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-100 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">Recent</h2>
+            {unreadCount > 0 && (
+              <span className="text-sm text-gray-500">• {unreadCount} unread</span>
+            )}
           </div>
-          <div className="ml-auto">
-            <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-semibold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-colors">
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
+              <button
+                type="button"
+                onClick={() => setFilter("all")}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  filter === "all" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("unread")}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  filter === "unread" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Unread
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-semibold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-colors"
+            >
               <BellRing className="w-4 h-4" />
               Mark all as read
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Recent activity</h2>
-          <span className="text-sm text-gray-500">{notifications.length} updates</span>
-        </div>
-
-        <div className="divide-y divide-gray-100">
-          {notifications.map((notification) => (
-            <div
+        <div className="max-h-[72vh] overflow-y-auto divide-y divide-gray-100">
+          {visibleNotifications.map((notification) => (
+            <button
               key={notification.id}
-              className="px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+              type="button"
+              onClick={() =>
+                setNotifications((prev) =>
+                  prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+                )
+              }
+              className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors ${
+                notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"
+              }`}
             >
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-2xl border ${badgeStyles[notification.type]}`}>
-                  {iconMap[notification.type]}
+              <div className="relative flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${badgeStyles[notification.type]}`}>
+                    {iconMap[notification.type]}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 leading-tight">
-                    {notification.title}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
-                </div>
+                {!notification.read && (
+                  <span className="absolute top-0 right-0 w-3 h-3 bg-blue-600 border-2 border-white rounded-full" />
+                )}
               </div>
-              <div className="flex items-center gap-4 md:flex-col md:items-end">
-                <span className="text-xs text-gray-400 whitespace-nowrap">
-                  {notification.timestamp}
-                </span>
-                <button className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
-                  View details
-                </button>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-900 leading-snug">
+                  <span className="font-semibold">{notification.title}</span>
+                  <span className="text-gray-600"> — {notification.description}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-1">{notification.timestamp}</p>
               </div>
-            </div>
+            </button>
           ))}
+
+          {visibleNotifications.length === 0 && (
+            <div className="px-4 py-10 text-center text-sm text-gray-500">No notifications to show.</div>
+          )}
         </div>
       </div>
     </div>

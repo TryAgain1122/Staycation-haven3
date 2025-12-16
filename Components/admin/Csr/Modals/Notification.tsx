@@ -12,6 +12,8 @@ interface Notification {
   type?: "info" | "success" | "warning";
 }
 
+type LocalNotification = Notification & { read: boolean };
+
 interface NotificationModalProps {
   notifications: Notification[];
   onClose: () => void;
@@ -25,10 +27,26 @@ const iconMap: Record<string, ReactNode> = {
   warning: <Clock className="w-4 h-4" />,
 };
 
-export default function NotificationModal({ notifications, onClose, onViewAll, anchorRef }: NotificationModalProps) {
+const typeStyles: Record<NonNullable<Notification["type"]>, { wrapper: string; iconWrap: string }> = {
+  info: {
+    wrapper: "border border-gray-100 hover:border-brand-primary/30",
+    iconWrap: "bg-brand-primaryLighter text-brand-primary",
+  },
+  success: {
+    wrapper: "border border-gray-100 hover:border-green-200",
+    iconWrap: "bg-green-50 text-green-600",
+  },
+  warning: {
+    wrapper: "border border-gray-100 hover:border-yellow-200",
+    iconWrap: "bg-yellow-50 text-yellow-600",
+  },
+};
 
+export default function NotificationModal({ notifications, onClose, onViewAll, anchorRef }: NotificationModalProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [position, setPosition] = useState({ top: 96, right: 16 });
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [items, setItems] = useState<LocalNotification[]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +96,23 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
     return () => setIsMounted(false);
   }, []);
 
+  useEffect(() => {
+    setItems((prev) => {
+      const prevMap = new Map(prev.map((n) => [n.id, n]));
+      return notifications.map((n) => {
+        const existing = prevMap.get(n.id);
+        return {
+          ...n,
+          read: existing?.read ?? false,
+        };
+      });
+    });
+  }, [notifications]);
+
   if (!isMounted) return null;
+
+  const unreadCount = items.filter((n) => !n.read).length;
+  const visibleItems = filter === "unread" ? items.filter((n) => !n.read) : items;
 
   return createPortal(
     <>
@@ -91,52 +125,105 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
           right: position.right,
         }}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-h-[80vh] flex flex-col overflow-hidden border border-orange-100">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-yellow-50">
+        <div className="bg-white rounded-2xl shadow-2xl max-h-[80vh] flex flex-col overflow-hidden border border-brand-primary/20">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-brand-primaryLighter to-white">
             <div className="flex items-center gap-2">
-              <BellRing className="w-5 h-5 text-orange-500" />
+              <BellRing className="w-5 h-5 text-brand-primary" />
               <div>
-                <p className="text-xs font-semibold tracking-[0.3em] text-orange-500 uppercase">
+                <p className="text-xs font-semibold tracking-[0.3em] text-brand-primary uppercase">
                   Notifications
                 </p>
-                <h2 className="text-xl font-bold text-gray-900">Recent activity</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-gray-900">Recent</h2>
+                  {unreadCount > 0 && <span className="text-sm text-gray-500">• {unreadCount} unread</span>}
+                </div>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-white transition-colors text-gray-500"
+              className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors text-gray-500"
+              type="button"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-            {notifications.length === 0 ? (
-              <div className="text-center py-10 text-sm text-gray-500">
-                You&apos;re all caught up!
-              </div>
+          <div className="px-6 py-3 border-b border-gray-100 bg-white flex items-center gap-2">
+            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
+              <button
+                type="button"
+                onClick={() => setFilter("all")}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  filter === "all" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("unread")}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  filter === "unread" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Unread
+              </button>
+            </div>
+
+            <div className="ml-auto">
+              <button
+                type="button"
+                onClick={() => setItems((prev) => prev.map((n) => ({ ...n, read: true })))}
+                className="text-sm font-semibold text-brand-primary hover:text-brand-primaryDark transition-colors"
+              >
+                Mark all as read
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {visibleItems.length === 0 ? (
+              <div className="text-center py-10 text-sm text-gray-500">You&apos;re all caught up!</div>
             ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="border border-gray-100 rounded-xl p-4 hover:border-orange-200 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-full bg-orange-50 text-orange-500`}>
-                      {iconMap[notification.type || "info"]}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-4">
-                        <p className="text-sm font-semibold text-gray-900">{notification.title}</p>
-                        <span className="text-xs text-gray-400 whitespace-nowrap">
-                          {notification.timestamp}
-                        </span>
+              <div className="divide-y divide-gray-100">
+                {visibleItems.map((notification) => {
+                  const type = notification.type || "info";
+                  const styles = typeStyles[type];
+                  return (
+                    <button
+                      key={notification.id}
+                      type="button"
+                      onClick={() =>
+                        setItems((prev) =>
+                          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+                        )
+                      }
+                      className={`w-full text-left px-6 py-4 flex items-start gap-3 transition-colors ${
+                        notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"
+                      }`}
+                    >
+                      <div className="relative flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${styles.iconWrap}`}>
+                            {iconMap[type]}
+                          </div>
+                        </div>
+                        {!notification.read && (
+                          <span className="absolute top-0 right-0 w-3 h-3 bg-blue-600 border-2 border-white rounded-full" />
+                        )}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900 leading-snug">
+                          <span className="font-semibold">{notification.title}</span>
+                          <span className="text-gray-600"> — {notification.description}</span>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{notification.timestamp}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
 
@@ -147,7 +234,8 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
                   onViewAll();
                 }
               }}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-primary hover:text-brand-primaryDark transition-colors"
+              type="button"
             >
               View all notifications
               <span aria-hidden="true">→</span>
