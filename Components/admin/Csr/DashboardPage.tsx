@@ -52,25 +52,25 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity Table */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 border border-transparent dark:border-gray-800">
+        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Recent Activity</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+              <tr className="border-b-2 border-gray-200 dark:border-gray-800">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Time
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Action
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Customer
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Details
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Status
                 </th>
               </tr>
@@ -132,29 +132,29 @@ export default function DashboardPage() {
                 return (
                   <tr
                     key={i}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-in fade-in duration-500"
+                    className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-in fade-in duration-500"
                     style={{ animationDelay: `${i * 50}ms` }}
                   >
                     <td className="py-4 px-4">
-                      <span className="text-sm font-medium text-gray-600">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         {item.time}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <ActivityIcon className={`w-5 h-5 ${item.iconColor}`} />
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                           {item.action}
                         </span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="text-sm font-medium text-gray-800">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
                         {item.customer}
                       </p>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         {item.details}
                       </span>
                     </td>
@@ -173,8 +173,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-          <p className="text-sm text-gray-600">Showing 5 of 48 activities</p>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Showing 5 of 48 activities</p>
           <button className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors">
             View All Activity
           </button>
@@ -183,8 +183,8 @@ export default function DashboardPage() {
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Today&apos;s Tasks</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Today&apos;s Tasks</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Check-ins</span>
@@ -201,8 +201,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Payment Status</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Payment Status</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Paid</span>
@@ -219,8 +219,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Inventory Alerts</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Inventory Alerts</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Low Stock</span>

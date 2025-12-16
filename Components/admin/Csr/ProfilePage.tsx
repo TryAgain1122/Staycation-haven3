@@ -129,14 +129,14 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Profile</h1>
-          <p className="text-sm text-gray-500">View and manage your employee information</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Profile</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">View and manage your employee information</p>
         </div>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
-          <X className="w-5 h-5 text-gray-600" />
+          <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
       </div>
 
@@ -146,7 +146,7 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-transparent dark:border-gray-800">
         {isLoading ? (
           <ProfileSkeleton />
         ) : (
@@ -164,10 +164,11 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
                     <span>{displayName?.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <p className="mt-4 text-center text-gray-600 text-sm">
+                <p className="mt-4 text-center text-gray-600 dark:text-gray-300 text-sm">
                   Employment ID:{" "}
-                  <span className="font-semibold text-gray-800">{employmentId}</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-100">{employmentId}</span>
                 </p>
+
                 <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold uppercase tracking-wide">
                   Active
                 </div>
@@ -188,20 +189,20 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
                     <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">
                       Monthly Salary
                     </p>
-                    <p className="text-2xl font-bold text-gray-800 mt-1">{salary}</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">{salary}</p>
                   </div>
-                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl">
                     <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">
                       Office Location
                     </p>
-                    <p className="text-lg font-semibold text-gray-800 mt-1">{address}</p>
+                    <p className="text-lg font-semibold text-gray-800 dark:text-gray-100 mt-1">{address}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {isLoading && (
-              <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
+              <div className="mt-6 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading latest information...
               </div>
@@ -218,8 +219,8 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
           </>
         ) : (
           <>
-            <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 border border-gray-100 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Contact Information</h3>
               <div className="space-y-3">
                 <InfoRow label="Email" value={contactEmail} />
                 <InfoRow label="Phone" value={phone} />
@@ -227,8 +228,8 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Employment Details</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 border border-gray-100 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Employment Details</h3>
               <div className="space-y-3">
                 <InfoRow label="Employment ID" value={employmentId} />
                 <InfoRow label="Department" value={department} />

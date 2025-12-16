@@ -8,8 +8,9 @@ interface PropsProvider {
 const UIProviders = ({ children }: PropsProvider) => {
   return (
     <NextUIProvider>
-      {/* <NextThemesProvider attribute="class" defaultTheme="darkmode">{children}</NextThemesProvider> */}
-      {children}
+      <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+        {children}
+      </NextThemesProvider>
     </NextUIProvider>
   );
 };

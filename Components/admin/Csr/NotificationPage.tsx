@@ -76,37 +76,39 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
     <div className="space-y-6 animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Notifications</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Notifications</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Review booking, payment, and guest updates that need your attention.
           </p>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         )}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
         <div className="px-4 py-4 border-b border-gray-100 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-gray-900">Recent</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent</h2>
             {unreadCount > 0 && (
-              <span className="text-sm text-gray-500">• {unreadCount} unread</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">• {unreadCount} unread</span>
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
+            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100 dark:bg-gray-800">
               <button
                 type="button"
                 onClick={() => setFilter("all")}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  filter === "all" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                  filter === "all"
+                    ? "bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 All
@@ -115,7 +117,9 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
                 type="button"
                 onClick={() => setFilter("unread")}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  filter === "unread" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                  filter === "unread"
+                    ? "bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 Unread
@@ -133,7 +137,7 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
           </div>
         </div>
 
-        <div className="max-h-[72vh] overflow-y-auto divide-y divide-gray-100">
+        <div className="max-h-[72vh] overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
           {visibleNotifications.map((notification) => (
             <button
               key={notification.id}
@@ -144,11 +148,13 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
                 )
               }
               className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors ${
-                notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"
+                notification.read
+                  ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  : "bg-blue-50/60 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
               }`}
             >
               <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${badgeStyles[notification.type]}`}>
                     {iconMap[notification.type]}
                   </div>
@@ -159,17 +165,17 @@ export default function NotificationPage({ onClose }: NotificationPageProps) {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 leading-snug">
+                <p className="text-sm text-gray-900 dark:text-gray-100 leading-snug">
                   <span className="font-semibold">{notification.title}</span>
-                  <span className="text-gray-600"> — {notification.description}</span>
+                  <span className="text-gray-600 dark:text-gray-300"> — {notification.description}</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{notification.timestamp}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{notification.timestamp}</p>
               </div>
             </button>
           ))}
 
           {visibleNotifications.length === 0 && (
-            <div className="px-4 py-10 text-center text-sm text-gray-500">No notifications to show.</div>
+            <div className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No notifications to show.</div>
           )}
         </div>
       </div>

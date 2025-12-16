@@ -125,8 +125,8 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
           right: position.right,
         }}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-h-[80vh] flex flex-col overflow-hidden border border-brand-primary/20">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-brand-primaryLighter to-white">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-h-[80vh] flex flex-col overflow-hidden border border-brand-primary/20 dark:border-gray-800">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-brand-primaryLighter to-white dark:from-gray-900 dark:to-gray-900">
             <div className="flex items-center gap-2">
               <BellRing className="w-5 h-5 text-brand-primary" />
               <div>
@@ -134,27 +134,29 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
                   Notifications
                 </p>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-gray-900">Recent</h2>
-                  {unreadCount > 0 && <span className="text-sm text-gray-500">• {unreadCount} unread</span>}
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recent</h2>
+                  {unreadCount > 0 && <span className="text-sm text-gray-500 dark:text-gray-400">• {unreadCount} unread</span>}
                 </div>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors text-gray-500"
+              className="p-2 rounded-full hover:bg-brand-primaryLighter dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-300"
               type="button"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="px-6 py-3 border-b border-gray-100 bg-white flex items-center gap-2">
-            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
+          <div className="px-6 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center gap-2">
+            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100 dark:bg-gray-800">
               <button
                 type="button"
                 onClick={() => setFilter("all")}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  filter === "all" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                  filter === "all"
+                    ? "bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 All
@@ -163,7 +165,9 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
                 type="button"
                 onClick={() => setFilter("unread")}
                 className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  filter === "unread" ? "bg-white shadow-sm text-gray-900" : "text-gray-600 hover:text-gray-900"
+                  filter === "unread"
+                    ? "bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 }`}
               >
                 Unread
@@ -183,9 +187,9 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
 
           <div className="flex-1 overflow-y-auto">
             {visibleItems.length === 0 ? (
-              <div className="text-center py-10 text-sm text-gray-500">You&apos;re all caught up!</div>
+              <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">You&apos;re all caught up!</div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {visibleItems.map((notification) => {
                   const type = notification.type || "info";
                   const styles = typeStyles[type];
@@ -199,26 +203,29 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
                         )
                       }
                       className={`w-full text-left px-6 py-4 flex items-start gap-3 transition-colors ${
-                        notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"
+                        notification.read
+                          ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          : "bg-blue-50/60 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                       }`}
                     >
                       <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${styles.iconWrap}`}>
                             {iconMap[type]}
                           </div>
                         </div>
+
                         {!notification.read && (
                           <span className="absolute top-0 right-0 w-3 h-3 bg-blue-600 border-2 border-white rounded-full" />
                         )}
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 leading-snug">
+                        <p className="text-sm text-gray-900 dark:text-gray-100 leading-snug">
                           <span className="font-semibold">{notification.title}</span>
-                          <span className="text-gray-600"> — {notification.description}</span>
+                          <span className="text-gray-600 dark:text-gray-300"> — {notification.description}</span>
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">{notification.timestamp}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{notification.timestamp}</p>
                       </div>
                     </button>
                   );
@@ -227,7 +234,7 @@ export default function NotificationModal({ notifications, onClose, onViewAll, a
             )}
           </div>
 
-          <div className="px-6 py-4 border-t border-gray-100 bg-white">
+          <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
             <button
               onClick={() => {
                 if (onViewAll) {

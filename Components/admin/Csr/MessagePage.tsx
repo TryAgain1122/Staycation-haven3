@@ -160,15 +160,15 @@ export default function MessagePage({ onClose }: MessagePageProps) {
     <div className="animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
-          <p className="text-sm text-gray-500">Review and respond to guest and internal chat updates.</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Messages</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Review and respond to guest and internal chat updates.</p>
         </div>
       </div>
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
-          <div className="border-b lg:border-b-0 lg:border-r border-gray-200 bg-white flex flex-col h-[72vh]">
-            <div className="h-16 px-4 flex items-center gap-3 border-b border-gray-200 bg-gradient-to-r from-brand-primaryLighter to-white">
-              <p className="text-base font-bold text-gray-900">Chats</p>
+          <div className="border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col h-[72vh]">
+            <div className="h-16 px-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-brand-primaryLighter to-white dark:from-gray-900 dark:to-gray-900">
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">Chats</p>
               <div className="ml-auto flex items-center gap-2">
                 <button
                   type="button"
@@ -197,7 +197,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search Messenger"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-full bg-gray-100 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary/30"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary/30"
                 />
               </div>
             </div>
@@ -211,7 +211,9 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                     type="button"
                     onClick={() => setActiveId(c.id)}
                     className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-colors ${
-                      isActive ? "bg-brand-primaryLighter" : "hover:bg-gray-50"
+                      isActive
+                        ? "bg-brand-primaryLighter dark:bg-gray-800"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     }`}
                   >
                     <div className="relative">
@@ -224,12 +226,13 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{c.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name}</p>
                         <span className="text-xs text-gray-400">•</span>
                         <p className="text-xs text-gray-400 whitespace-nowrap">{c.lastTime}</p>
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{c.lastMessage}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.lastMessage}</p>
                     </div>
+
                     {c.unreadCount > 0 && (
                       <div className="w-6 flex justify-end">
                         <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-brand-primary text-white text-xs font-bold">
@@ -243,15 +246,15 @@ export default function MessagePage({ onClose }: MessagePageProps) {
             </div>
           </div>
 
-          <div className="bg-white flex flex-col h-[72vh]">
-            <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 bg-white sticky top-0 z-10">
+          <div className="bg-white dark:bg-gray-900 flex flex-col h-[72vh]">
+            <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0">
                   {activeConversation.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{activeConversation.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{activeConversation.subtitle}</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{activeConversation.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{activeConversation.subtitle}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -267,7 +270,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white px-4 py-4 space-y-3">
+            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 px-4 py-4 space-y-3">
               {thread.map((m) => {
                 const isMe = m.from === "me";
                 return (
@@ -277,7 +280,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                           isMe
                             ? "bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-br-md"
-                            : "bg-white text-gray-900 border border-gray-200 rounded-bl-md"
+                            : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-800 rounded-bl-md"
                         }`}
                       >
                         {m.text}
@@ -289,7 +292,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
               })}
             </div>
 
-            <div className="border-t border-gray-200 bg-white px-4 py-3">
+            <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3">
               <div className="flex items-end gap-2">
                 <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Add">
                   <Plus className="w-5 h-5 text-brand-primary" />
@@ -297,7 +300,7 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                 <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Attach">
                   <ImageIcon className="w-5 h-5 text-brand-primary" />
                 </button>
-                <div className="flex-1 bg-gray-100 rounded-full px-3 py-2 flex items-center gap-2 border border-gray-100 focus-within:bg-white focus-within:border-brand-primary/30 focus-within:ring-2 focus-within:ring-brand-primary/20">
+                <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-2 flex items-center gap-2 border border-gray-100 dark:border-gray-800 focus-within:bg-white dark:focus-within:bg-gray-900 focus-within:border-brand-primary/30 focus-within:ring-2 focus-within:ring-brand-primary/20">
                   <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
@@ -308,12 +311,13 @@ export default function MessagePage({ onClose }: MessagePageProps) {
                       }
                     }}
                     placeholder="Aa"
-                    className="flex-1 bg-transparent outline-none text-sm"
+                    className="flex-1 bg-transparent outline-none text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
                   />
                   <button type="button" className="p-1.5 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Emoji">
                     <Smile className="w-5 h-5 text-brand-primary" />
                   </button>
                 </div>
+
                 <button
                   type="button"
                   onClick={sendMessage}

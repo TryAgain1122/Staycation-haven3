@@ -13,12 +13,15 @@ import {
   Wifi,
   Lock,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 const primaryBtn =
   "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2";
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+
   const [notificationPrefs, setNotificationPrefs] = useState({
     bookingAlerts: true,
     payoutUpdates: true,
@@ -39,6 +42,11 @@ export default function SettingsPage() {
     timezone: "GMT+08",
   });
 
+  useEffect(() => {
+    if (!theme) return;
+    setAppearance((prev) => ({ ...prev, theme }));
+  }, [theme]);
+
   const toggleNotification = (key: keyof typeof notificationPrefs) => {
     setNotificationPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -52,6 +60,10 @@ export default function SettingsPage() {
     value: string
   ) => {
     setAppearance((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "theme") {
+      setTheme(value);
+    }
   };
 
   return (
@@ -60,8 +72,8 @@ export default function SettingsPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400">
           Workspace
         </p>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500 max-w-2xl">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl">
           Configure notification preferences, security controls, and workspace
           defaults for the CSR dashboard experience.
         </p>
@@ -99,7 +111,7 @@ export default function SettingsPage() {
         ].map((card) => (
           <div
             key={card.label}
-            className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm"
           >
             <div
               className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${card.accent}`}
@@ -107,7 +119,7 @@ export default function SettingsPage() {
               {card.icon}
               {card.label}
             </div>
-            <p className="mt-4 text-3xl font-bold text-gray-900">
+            <p className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
               {card.value}
               {card.total ? (
                 <span className="text-base font-medium text-gray-400">
@@ -115,7 +127,7 @@ export default function SettingsPage() {
                 </span>
               ) : null}
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Last updated a few seconds ago
             </p>
           </div>
@@ -123,18 +135,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Notification Preferences */}
-      <section className="rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 border-b border-gray-100 px-6 py-5">
+      <section className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="flex flex-col gap-2 border-b border-gray-100 dark:border-gray-800 px-6 py-5">
           <div className="flex items-center gap-2 text-brand-primary">
             <Bell className="w-4 h-4" />
             <p className="text-xs font-semibold uppercase tracking-[0.3em]">
               Alerts & notifications
             </p>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Notification preferences
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Choose when CSR admins are notified of booking activity, payouts, or
             internal announcements.
           </p>
@@ -170,10 +182,10 @@ export default function SettingsPage() {
               className="flex flex-wrap items-start justify-between gap-4 px-6 py-5"
             >
               <div>
-                <p className="text-base font-semibold text-gray-900">
+                <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                   {item.title}
                 </p>
-                <p className="text-sm text-gray-500">{item.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
               </div>
               <button
                 onClick={() => toggleNotification(item.id)}
@@ -332,18 +344,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance */}
-      <section className="rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 border-b border-gray-100 px-6 py-5">
+      <section className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="flex flex-col gap-2 border-b border-gray-100 dark:border-gray-800 px-6 py-5">
           <div className="flex items-center gap-2 text-indigo-600">
             <Palette className="w-4 h-4" />
             <p className="text-xs font-semibold uppercase tracking-[0.3em]">
               Workspace defaults
             </p>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Appearance & localization
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Keep the CSR workspace aligned with your operating hours and
             readability needs.
           </p>
@@ -351,13 +363,13 @@ export default function SettingsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 px-6 py-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
               Theme mode
             </label>
             <select
               value={appearance.theme}
               onChange={(e) => handleAppearanceChange("theme", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             >
               <option value="light">Light mode</option>
               <option value="dark">Dark mode</option>
@@ -366,7 +378,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
               Density
             </label>
             <select
@@ -374,7 +386,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleAppearanceChange("density", e.target.value)
               }
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             >
               <option value="comfortable">Comfortable</option>
               <option value="compact">Compact</option>
