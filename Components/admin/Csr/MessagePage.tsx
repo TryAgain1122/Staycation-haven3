@@ -1,138 +1,330 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { MessageSquare, MailCheck, MailWarning, MailQuestion, X } from "lucide-react";
-
-type MessageType = "unread" | "urgent" | "info";
-
-interface Message {
-  id: string;
-  sender: string;
-  subject: string;
-  preview: string;
-  timestamp: string;
-  type: MessageType;
-}
+import { useMemo, useState } from "react";
+import {
+  Search,
+  Phone,
+  Video,
+  Info,
+  Send,
+  Plus,
+  Image as ImageIcon,
+  Smile,
+  X,
+} from "lucide-react";
 
 interface MessagePageProps {
   onClose?: () => void;
 }
 
-const mockMessages: Message[] = [
+type ConversationId = "c1" | "c2" | "c3";
+
+interface Conversation {
+  id: ConversationId;
+  name: string;
+  subtitle: string;
+  lastMessage: string;
+  lastTime: string;
+  unreadCount: number;
+  online?: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  conversationId: ConversationId;
+  from: "me" | "them";
+  text: string;
+  time: string;
+}
+
+const conversations: Conversation[] = [
   {
-    id: "msg-1",
-    sender: "Emily Brown",
-    subject: "Clarification about payment receipt",
-    preview: "Hello, could you confirm if my receipt was sent to the right email?",
-    timestamp: "5 mins ago",
-    type: "unread",
+    id: "c1",
+    name: "Emily Brown",
+    subtitle: "Guest",
+    lastMessage: "Could you confirm if my receipt was sent to the right email?",
+    lastTime: "5m",
+    unreadCount: 2,
+    online: true,
   },
   {
-    id: "msg-2",
-    sender: "Facility Team",
-    subject: "Urgent: Room 204 maintenance verification",
-    preview: "Can CSR confirm that the postponed maintenance visit is approved?",
-    timestamp: "32 mins ago",
-    type: "urgent",
+    id: "c2",
+    name: "Facility Team",
+    subtitle: "Internal",
+    lastMessage: "Can CSR confirm the postponed maintenance visit is approved?",
+    lastTime: "32m",
+    unreadCount: 0,
   },
   {
-    id: "msg-3",
-    sender: "Michael Cruz",
-    subject: "Late check-in assistance",
-    preview: "Hey team, arriving past midnight—may I still get full concierge support?",
-    timestamp: "1 hr ago",
-    type: "info",
+    id: "c3",
+    name: "Michael Cruz",
+    subtitle: "Guest",
+    lastMessage: "Arriving past midnight—can I still get concierge support?",
+    lastTime: "1h",
+    unreadCount: 1,
   },
 ];
 
-const iconMap: Record<MessageType, ReactNode> = {
-  unread: <MailCheck className="w-4 h-4" />,
-  urgent: <MailWarning className="w-4 h-4" />,
-  info: <MailQuestion className="w-4 h-4" />,
-};
-
-const badgeStyles: Record<MessageType, string> = {
-  unread: "bg-blue-50 text-blue-600 border-blue-100",
-  urgent: "bg-red-50 text-red-600 border-red-100",
-  info: "bg-gray-50 text-gray-600 border-gray-100",
-};
+const initialMessages: ChatMessage[] = [
+  {
+    id: "m1",
+    conversationId: "c1",
+    from: "them",
+    text: "Hello! Could you confirm if my receipt was sent to the right email?",
+    time: "2:10 PM",
+  },
+  {
+    id: "m2",
+    conversationId: "c1",
+    from: "me",
+    text: "Hi Emily — sure. Can you share the email you used for the booking?",
+    time: "2:12 PM",
+  },
+  {
+    id: "m3",
+    conversationId: "c1",
+    from: "them",
+    text: "It’s emily.b@email.com",
+    time: "2:13 PM",
+  },
+  {
+    id: "m4",
+    conversationId: "c2",
+    from: "them",
+    text: "Urgent: Room 204 maintenance verification. Can CSR confirm approval?",
+    time: "1:40 PM",
+  },
+  {
+    id: "m5",
+    conversationId: "c2",
+    from: "me",
+    text: "Acknowledged. I’ll confirm with the booking owner and update you shortly.",
+    time: "1:42 PM",
+  },
+  {
+    id: "m6",
+    conversationId: "c3",
+    from: "them",
+    text: "Hey team, arriving past midnight—may I still get full concierge support?",
+    time: "1:05 PM",
+  },
+];
 
 export default function MessagePage({ onClose }: MessagePageProps) {
-  const [messages] = useState(mockMessages);
+  const [search, setSearch] = useState("");
+  const [activeId, setActiveId] = useState<ConversationId>("c1");
+  const [draft, setDraft] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialMessages);
+
+  const activeConversation = useMemo(
+    () => conversations.find((c) => c.id === activeId) ?? conversations[0],
+    [activeId]
+  );
+
+  const filteredConversations = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return conversations;
+    return conversations.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(term) ||
+        c.lastMessage.toLowerCase().includes(term) ||
+        c.subtitle.toLowerCase().includes(term)
+      );
+    });
+  }, [search]);
+
+  const thread = useMemo(() => {
+    return chatMessages.filter((m) => m.conversationId === activeId);
+  }, [activeId, chatMessages]);
+
+  const sendMessage = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        id: `m-${Date.now()}`,
+        conversationId: activeId,
+        from: "me",
+        text,
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      },
+    ]);
+    setDraft("");
+  };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className="animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
-          <p className="text-sm text-gray-500">
-            Coordinate with guests, teams, and partners directly inside your CSR workspace.
-          </p>
-        </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
-        )}
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <div className="flex flex-wrap gap-6">
-          <div className="flex-1 min-w-[220px]">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">
-              Inbox health
-            </p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{messages.length}</p>
-            <p className="text-sm text-gray-500">Active threads</p>
-          </div>
-          <div className="ml-auto">
-            <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-semibold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-colors">
-              <MessageSquare className="w-4 h-4" />
-              Compose new message
-            </button>
-          </div>
+          <p className="text-sm text-gray-500">Review and respond to guest and internal chat updates.</p>
         </div>
       </div>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
+          <div className="border-b lg:border-b-0 lg:border-r border-gray-200 bg-white flex flex-col h-[72vh]">
+            <div className="h-16 px-4 flex items-center gap-3 border-b border-gray-200 bg-gradient-to-r from-brand-primaryLighter to-white">
+              <p className="text-base font-bold text-gray-900">Chats</p>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors"
+                  title="New message"
+                >
+                  <Plus className="w-5 h-5 text-gray-600" />
+                </button>
+                {onClose && (
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors"
+                    title="Close"
+                    type="button"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+              </div>
+            </div>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Conversation list</h2>
-          <span className="text-sm text-gray-500">{messages.length} conversations</span>
-        </div>
+            <div className="p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search Messenger"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-full bg-gray-100 border border-gray-100 focus:bg-white focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary/30"
+                />
+              </div>
+            </div>
 
-        <div className="divide-y divide-gray-100">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className="px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
-            >
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-2xl border ${badgeStyles[message.type]}`}>
-                  {iconMap[message.type]}
+            <div className="flex-1 overflow-y-auto">
+              {filteredConversations.map((c) => {
+                const isActive = c.id === activeId;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setActiveId(c.id)}
+                    className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-colors ${
+                      isActive ? "bg-brand-primaryLighter" : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="relative">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      {c.online && (
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{c.name}</p>
+                        <span className="text-xs text-gray-400">•</span>
+                        <p className="text-xs text-gray-400 whitespace-nowrap">{c.lastTime}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{c.lastMessage}</p>
+                    </div>
+                    {c.unreadCount > 0 && (
+                      <div className="w-6 flex justify-end">
+                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-brand-primary text-white text-xs font-bold">
+                          {c.unreadCount}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-white flex flex-col h-[72vh]">
+            <div className="h-16 px-4 flex items-center justify-between border-b border-gray-200 bg-white sticky top-0 z-10">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primaryDark text-white font-bold flex items-center justify-center flex-shrink-0">
+                  {activeConversation.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 leading-tight">
-                    {message.subject}
-                  </p>
-                  <p className="text-xs uppercase tracking-wide text-gray-400 mt-1">
-                    from {message.sender}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">{message.preview}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900 truncate">{activeConversation.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{activeConversation.subtitle}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 md:flex-col md:items-end">
-                <span className="text-xs text-gray-400 whitespace-nowrap">
-                  {message.timestamp}
-                </span>
-                <button className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
-                  Open thread
+              <div className="flex items-center gap-1">
+                <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Call">
+                  <Phone className="w-5 h-5 text-brand-primary" />
+                </button>
+                <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Video">
+                  <Video className="w-5 h-5 text-brand-primary" />
+                </button>
+                <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Info">
+                  <Info className="w-5 h-5 text-brand-primary" />
                 </button>
               </div>
             </div>
-          ))}
+
+            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white px-4 py-4 space-y-3">
+              {thread.map((m) => {
+                const isMe = m.from === "me";
+                return (
+                  <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
+                      <div
+                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                          isMe
+                            ? "bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-br-md"
+                            : "bg-white text-gray-900 border border-gray-200 rounded-bl-md"
+                        }`}
+                      >
+                        {m.text}
+                      </div>
+                      <span className="text-[11px] text-gray-400">{m.time}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-gray-200 bg-white px-4 py-3">
+              <div className="flex items-end gap-2">
+                <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Add">
+                  <Plus className="w-5 h-5 text-brand-primary" />
+                </button>
+                <button type="button" className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Attach">
+                  <ImageIcon className="w-5 h-5 text-brand-primary" />
+                </button>
+                <div className="flex-1 bg-gray-100 rounded-full px-3 py-2 flex items-center gap-2 border border-gray-100 focus-within:bg-white focus-within:border-brand-primary/30 focus-within:ring-2 focus-within:ring-brand-primary/20">
+                  <input
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Aa"
+                    className="flex-1 bg-transparent outline-none text-sm"
+                  />
+                  <button type="button" className="p-1.5 rounded-full hover:bg-brand-primaryLighter transition-colors" title="Emoji">
+                    <Smile className="w-5 h-5 text-brand-primary" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={sendMessage}
+                  className="p-2 rounded-full hover:bg-brand-primaryLighter transition-colors"
+                  title="Send"
+                >
+                  <Send className="w-5 h-5 text-brand-primary" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
