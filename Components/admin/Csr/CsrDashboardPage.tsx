@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User, MessageSquare } from "lucide-react";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
@@ -46,21 +47,21 @@ export default function CsrDashboard() {
       title: "New booking pending approval",
       description: "A new booking for Haven 2 requires CSR confirmation.",
       timestamp: "2 mins ago",
-      type: "info",
+      type: "info" as const,
     },
     {
       id: "2",
       title: "Payment received",
       description: "₱12,500 from Emily Brown was confirmed.",
       timestamp: "15 mins ago",
-      type: "success",
+      type: "success" as const,
     },
     {
       id: "3",
       title: "Guest check-in reminder",
       description: "Mike Wilson will arrive today at 3:00 PM.",
       timestamp: "1 hr ago",
-      type: "warning",
+      type: "warning" as const,
     },
   ];
 
@@ -150,9 +151,18 @@ export default function CsrDashboard() {
         {/* Logo Section */}
         <div className="h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50 flex items-center">
           <div className="flex items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                SH
+            <div
+              className={`flex items-center ${sidebar ? "gap-3" : "justify-center w-full"}`}
+            >
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/haven_logo.png"
+                  alt="Staycation Haven logo"
+                  width={48}
+                  height={48}
+                  className="object-cover"
+                  priority
+                />
               </div>
               {sidebar && (
                 <div>
