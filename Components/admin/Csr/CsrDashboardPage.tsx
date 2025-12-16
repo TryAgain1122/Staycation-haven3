@@ -347,9 +347,9 @@ export default function CsrDashboard() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-x-hidden overflow-y-auto">
         {/* HEADER */}
-        <div className="bg-white border-b border-gray-200 px-6 h-20 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <div className="bg-white border-b border-gray-200 px-6 h-20 min-h-20 flex-shrink-0 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button */}
             <button
@@ -514,7 +514,7 @@ export default function CsrDashboard() {
         </div>
 
         {/* PAGE CONTENT */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6">
           <div className="max-w-[1600px] mx-auto">
             {page === "dashboard" && <DashboardPage />}
             {page === "bookings" && <BookingsPage />}
