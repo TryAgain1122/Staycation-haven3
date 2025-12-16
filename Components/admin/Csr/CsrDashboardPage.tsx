@@ -56,6 +56,7 @@ export default function CsrDashboard() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [messageBadge, setMessageBadge] = useState(true);
+  const [now, setNow] = useState(() => new Date());
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -113,6 +114,14 @@ export default function CsrDashboard() {
     if (savedPage) {
       setPage(savedPage);
     }
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => window.clearInterval(id);
   }, []);
 
   // Fetch employee data
@@ -361,13 +370,21 @@ export default function CsrDashboard() {
                 <Menu className="w-6 h-6 text-gray-600" />
               )}
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                {navItems.find((item) => item.id === page)?.label ||
-                  "Dashboard"}
-              </h1>
-              <p className="text-sm text-gray-500">
-                Welcome back! Here&apos;s what&apos;s happening today.
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-gray-800">
+                {now.toLocaleString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="text-xs text-gray-500">
+                {now.toLocaleString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
               </p>
             </div>
           </div>
