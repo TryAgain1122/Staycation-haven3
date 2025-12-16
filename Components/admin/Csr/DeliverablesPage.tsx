@@ -1,0 +1,481 @@
+"use client";
+
+import {
+  FileText,
+  Search,
+  Filter,
+  ArrowUpDown,
+  User,
+  CheckCircle,
+  Clock,
+  Truck,
+  Eye,
+  XCircle,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+
+type DeliverableItem =
+  | "Pool pass"
+  | "Bath robe"
+  | "Guest kit"
+  | "Towels"
+  | "Extra comforter"
+  | "Extra slippers";
+
+type DeliverableStatus = "Pending" | "Prepared" | "Delivered" | "Cancelled";
+
+interface DeliverableRow {
+  deliverables_id: string;
+  guest: string;
+  checkin: string;
+  checkout: string;
+  status: DeliverableStatus;
+  statusColor: string;
+  selected: DeliverableItem[];
+}
+
+const ALL_DELIVERABLES: DeliverableItem[] = [
+  "Pool pass",
+  "Bath robe",
+  "Guest kit",
+  "Towels",
+  "Extra comforter",
+  "Extra slippers",
+];
+
+export default function DeliverablesPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | DeliverableStatus>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(5);
+  const [sortField, setSortField] = useState<keyof DeliverableRow | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const [rows, setRows] = useState<DeliverableRow[]>([
+    {
+      deliverables_id: "DL-001",
+      guest: "John Smith",
+      checkin: "2024-03-15 15:00",
+      checkout: "2024-03-20 11:00",
+      status: "Prepared",
+      statusColor: "bg-indigo-100 text-indigo-700",
+      selected: ["Guest kit", "Towels"],
+    },
+    {
+      deliverables_id: "DL-002",
+      guest: "Sarah Johnson",
+      checkin: "2024-03-18 14:00",
+      checkout: "2024-03-22 11:00",
+      status: "Pending",
+      statusColor: "bg-yellow-100 text-yellow-700",
+      selected: ["Pool pass", "Bath robe"],
+    },
+    {
+      deliverables_id: "DL-003",
+      guest: "Mike Wilson",
+      checkin: "2024-03-20 15:00",
+      checkout: "2024-03-25 11:00",
+      status: "Delivered",
+      statusColor: "bg-green-100 text-green-700",
+      selected: ["Guest kit", "Towels", "Extra slippers"],
+    },
+    {
+      deliverables_id: "DL-004",
+      guest: "Emily Brown",
+      checkin: "2024-03-22 15:00",
+      checkout: "2024-03-27 11:00",
+      status: "Pending",
+      statusColor: "bg-yellow-100 text-yellow-700",
+      selected: ["Extra comforter", "Towels"],
+    },
+    {
+      deliverables_id: "DL-005",
+      guest: "David Lee",
+      checkin: "2024-03-25 15:00",
+      checkout: "2024-03-30 11:00",
+      status: "Cancelled",
+      statusColor: "bg-red-100 text-red-700",
+      selected: [],
+    },
+  ]);
+
+  const filteredRows = useMemo(() => {
+    return rows.filter((row) => {
+      const matchesSearch =
+        row.deliverables_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.guest.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilter = filterStatus === "all" || row.status === filterStatus;
+      return matchesSearch && matchesFilter;
+    });
+  }, [filterStatus, rows, searchTerm]);
+
+  const sortedRows = useMemo(() => {
+    const copy = [...filteredRows];
+    if (!sortField) return copy;
+    return copy.sort((a, b) => {
+      if (String(a[sortField] ?? "").toLowerCase() < String(b[sortField] ?? "").toLowerCase()) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (String(a[sortField] ?? "").toLowerCase() > String(b[sortField] ?? "").toLowerCase()) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredRows, sortDirection, sortField]);
+
+  const totalPages = Math.ceil(sortedRows.length / entriesPerPage);
+  const startIndex = (currentPage - 1) * entriesPerPage;
+  const endIndex = startIndex + entriesPerPage;
+  const paginatedRows = sortedRows.slice(startIndex, endIndex);
+
+  const handleSort = (field: keyof DeliverableRow) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const toggleDeliverable = (deliverables_id: string, item: DeliverableItem) => {
+    setRows((prev) =>
+      prev.map((row) => {
+        if (row.deliverables_id !== deliverables_id) return row;
+        const exists = row.selected.includes(item);
+        return {
+          ...row,
+          selected: exists ? row.selected.filter((x) => x !== item) : [...row.selected, item],
+        };
+      })
+    );
+  };
+
+  const setRowStatus = (deliverables_id: string, status: DeliverableStatus, statusColor: string) => {
+    setRows((prev) =>
+      prev.map((row) =>
+        row.deliverables_id === deliverables_id
+          ? {
+              ...row,
+              status,
+              statusColor,
+            }
+          : row
+      )
+    );
+  };
+
+  const totalCount = rows.length;
+  const pendingCount = rows.filter((r) => r.status === "Pending").length;
+  const preparedCount = rows.filter((r) => r.status === "Prepared").length;
+  const deliveredCount = rows.filter((r) => r.status === "Delivered").length;
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Deliverables Management</h1>
+          <p className="text-sm text-gray-500 mt-1">Prepare and track guest deliverables per booking</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Deliverables", value: String(totalCount), color: "bg-purple-500", icon: FileText },
+          { label: "Pending", value: String(pendingCount), color: "bg-yellow-500", icon: Clock },
+          { label: "Prepared", value: String(preparedCount), color: "bg-indigo-500", icon: CheckCircle },
+          { label: "Delivered", value: String(deliveredCount), color: "bg-green-500", icon: Truck },
+        ].map((stat, i) => {
+          const IconComponent = stat.icon;
+          return (
+            <div
+              key={i}
+              className={`${stat.color} text-white rounded-lg p-6 shadow hover:shadow-lg transition-all`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-90">{stat.label}</p>
+                  <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                </div>
+                <IconComponent className="w-12 h-12 opacity-50" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600 whitespace-nowrap">Show</label>
+              <select
+                value={entriesPerPage}
+                onChange={(e) => {
+                  setEntriesPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <label className="text-sm text-gray-600 whitespace-nowrap">entries</label>
+            </div>
+
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by deliverables ID or guest name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-600" />
+            <select
+              value={filterStatus}
+              onChange={(e) => {
+                setFilterStatus(e.target.value as any);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            >
+              <option value="all">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Prepared">Prepared</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1100px]">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+              <tr>
+                <th
+                  onClick={() => handleSort("deliverables_id")}
+                  className="text-left py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors group whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    Deliverables ID
+                    <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("guest")}
+                  className="text-left py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors group whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    Guest
+                    <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("checkin")}
+                  className="text-left py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors group whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    Check-In
+                    <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort("checkout")}
+                  className="text-left py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors group whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-2">
+                    Check-Out
+                    <ArrowUpDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                  </div>
+                </th>
+                <th className="text-left py-4 px-4 text-sm font-bold text-gray-700 whitespace-nowrap">Deliverables</th>
+                <th
+                  onClick={() => handleSort("status")}
+                  className="text-center py-4 px-4 text-sm font-bold text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors whitespace-nowrap"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    Status
+                    <ArrowUpDown className="w-4 h-4 text-gray-400" />
+                  </div>
+                </th>
+                <th className="text-center py-4 px-4 text-sm font-bold text-gray-700 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedRows.map((row) => (
+                <tr key={row.deliverables_id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="py-4 px-4">
+                    <span className="font-semibold text-gray-800 text-sm">{row.deliverables_id}</span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-2 min-w-[180px]">
+                      <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span className="font-semibold text-gray-800 text-sm">{row.guest}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">{row.checkin}</span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">{row.checkout}</span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 min-w-[340px]">
+                      {ALL_DELIVERABLES.map((item) => {
+                        const checked = row.selected.includes(item);
+                        return (
+                          <label key={item} className="flex items-center gap-2 text-xs text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleDeliverable(row.deliverables_id, item)}
+                              className="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+                            />
+                            <span className="select-none">{item}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${row.statusColor}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="View"
+                        type="button"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        title="Mark Prepared"
+                        type="button"
+                        onClick={() => setRowStatus(row.deliverables_id, "Prepared", "bg-indigo-100 text-indigo-700")}
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Mark Delivered"
+                        type="button"
+                        onClick={() => setRowStatus(row.deliverables_id, "Delivered", "bg-green-100 text-green-700")}
+                      >
+                        <Truck className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Cancel"
+                        type="button"
+                        onClick={() => setRowStatus(row.deliverables_id, "Cancelled", "bg-red-100 text-red-700")}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-600">
+              Showing {sortedRows.length === 0 ? 0 : startIndex + 1} to {Math.min(endIndex, sortedRows.length)} of {sortedRows.length} entries
+              {searchTerm || filterStatus !== "all" ? ` (filtered from ${rows.length} total entries)` : ""}
+            </p>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1 || totalPages === 0}
+                className="p-2 border border-gray-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="First Page"
+                type="button"
+              >
+                <ChevronsLeft className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1 || totalPages === 0}
+                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-white transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {Array.from({ length: Math.min(5, totalPages || 1) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                      currentPage === pageNum
+                        ? "bg-orange-500 text-white shadow-md"
+                        : "border border-gray-300 hover:bg-white"
+                    }`}
+                    disabled={totalPages === 0}
+                    type="button"
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-white transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="p-2 border border-gray-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Last Page"
+                type="button"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
