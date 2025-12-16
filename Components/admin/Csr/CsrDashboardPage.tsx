@@ -20,12 +20,30 @@ import NotificationModal from "./Modals/Notification";
 import MessagePage from "./MessagePage";
 import SettingsPage from "./SettingsPage";
 
+interface EmployeeProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  employment_id: string;
+  hire_date: string;
+  role: string;
+  department?: string;
+  monthly_salary?: number;
+  street_address?: string;
+  city?: string;
+  zip_code?: string;
+  profile_image_url?: string;
+}
+
 interface AdminUser {
   id: string;
-  email: string;
-  name: string;
-  role: string;
-  picture?: string;
+  email?: string | null;
+  name?: string | null;
+  role?: string;
+  image?: string | null;
+  profile_image_url?: string;
 }
 
 const ACTIVE_PAGE_STORAGE_KEY = "csr-dashboard-active-page";
@@ -38,6 +56,8 @@ export default function CsrDashboard() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [messageBadge, setMessageBadge] = useState(true);
+  const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
   const messageButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -94,6 +114,41 @@ export default function CsrDashboard() {
       setPage(savedPage);
     }
   }, []);
+
+  // Fetch employee data
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const controller = new AbortController();
+
+    const fetchEmployeeData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/admin/employees/${session.user.id}`, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Failed to load employee data");
+        }
+
+        setEmployee(payload?.data ?? null);
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+        console.error("Error fetching employee data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployeeData();
+
+    return () => controller.abort();
+  }, [session?.user?.id]);
 
   // Persist page changes
   useEffect(() => {
@@ -221,25 +276,64 @@ export default function CsrDashboard() {
         </nav>
 
         {/* User Profile & Logout */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-2 border-t border-gray-200 bg-white">
           {sidebar && (
-            <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold">
-                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+            <div className="mb-2">
+              <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex-shrink-0 flex items-center justify-center text-white font-medium text-lg overflow-hidden">
+                  {isLoading ? (
+                    <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                  ) : employee?.profile_image_url ? (
+                    <img
+                      src={employee.profile_image_url}
+                      alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : 'Profile'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '';
+                        target.onerror = null;
+                      }}
+                    />
+                  ) : (
+                    <span>
+                      {employee ? 
+                        `${employee.first_name?.[0] || ''}${employee.last_name?.[0] || ''}`.toUpperCase() || 'C'
+                        : 'C'
+                      }
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">
-                    {session?.user?.name || 'CSR Account'}
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {isLoading ? (
+                      <span className="inline-block h-4 bg-gray-200 rounded animate-pulse w-24"></span>
+                    ) : employee ? (
+                      `${employee.first_name} ${employee.last_name}`.trim()
+                    ) : (
+                      session?.user?.name || 'CSR Account'
+                    )}
                   </p>
-                  <p className="text-xs text-gray-500 truncate"> 
-                    {session?.user?.email || 'Loading...'}
+                  <p className="text-xs text-gray-500 truncate">
+                    {isLoading ? (
+                      <span className="inline-block h-3 bg-gray-100 rounded animate-pulse w-20 mt-0.5"></span>
+                    ) : employee?.role || (session?.user as any)?.role ? (
+                      employee?.role || (session?.user as any)?.role
+                    ) : (
+                      'CSR Staff'
+                    )}
                   </p>
                 </div>
               </div>
+              <div className="mt-2">
+                <CsrLogout sidebar={true} />
+              </div>
             </div>
           )}
-          <CsrLogout sidebar={sidebar} />
+          {!sidebar && (
+            <div className="flex justify-center py-2">
+              <CsrLogout sidebar={false} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -310,8 +404,16 @@ export default function CsrDashboard() {
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
-                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full overflow-hidden flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
+                  {employee?.profile_image_url ? (
+                    <img
+                      src={employee.profile_image_url}
+                      alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}</span>
+                  )}
                 </div>
                 <ChevronDown
                   className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? "rotate-180" : ""
