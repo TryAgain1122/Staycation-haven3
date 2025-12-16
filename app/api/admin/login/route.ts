@@ -1,95 +1,109 @@
-import { NextResponse } from 'next/server';
-import pool from '@/backend/config/db';
-import bcrypt from 'bcryptjs';
+// import { NextResponse } from 'next/server';
+// import pool from '@/backend/config/db';
+// import bcrypt from 'bcryptjs';
 
-export async function POST(request: Request) {
-  try {
-    console.log('🔐 Admin login attempt...');
+import { loginEmployee } from "@/backend/controller/employeeController";
+import { createEdgeRouter } from "next-connect";
+import { NextRequest, NextResponse } from "next/server";
 
-    const { email, password } = await request.json();
-    console.log('📧 Email:', email);
+// export async function POST(request: Request) {
+//   try {
+//     console.log('🔐 Admin login attempt...');
 
-    if (!email || !password) {
-      console.log('❌ Missing email or password');
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
-    }
+//     const { email, password } = await request.json();
+//     console.log('📧 Email:', email);
 
-    // Query user from database
-    console.log('🔍 Querying database for user...');
-    const result = await pool.query(
-      'SELECT user_id, email, password, user_role, name, picture FROM users WHERE email = $1',
-      [email]
-    );
+//     if (!email || !password) {
+//       console.log('❌ Missing email or password');
+//       return NextResponse.json(
+//         { error: 'Email and password are required' },
+//         { status: 400 }
+//       );
+//     }
 
-    console.log('📊 Query result rows:', result.rows.length);
-    const user = result.rows[0];
+//     // Query user from database
+//     console.log('🔍 Querying database for user...');
+//     const result = await pool.query(
+//       'SELECT user_id, email, password, user_role, name, picture FROM users WHERE email = $1',
+//       [email]
+//     );
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
+//     console.log('📊 Query result rows:', result.rows.length);
+//     const user = result.rows[0];
 
-    // Check if user has admin role (Owner, Csr, Cleaner, or Partner)
-    const adminRoles = ['Owner', 'Csr', 'Cleaner', 'Partner'];
-    if (!adminRoles.includes(user.user_role)) {
-      return NextResponse.json(
-        { error: 'You do not have admin access' },
-        { status: 403 }
-      );
-    }
+//     if (!user) {
+//       return NextResponse.json(
+//         { error: 'Invalid email or password' },
+//         { status: 401 }
+//       );
+//     }
 
-    // Verify password (if password exists in database)
-    if (user.password) {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return NextResponse.json(
-          { error: 'Invalid email or password' },
-          { status: 401 }
-        );
-      }
-    } else {
-      // If no password is set (Google OAuth users), deny access
-      return NextResponse.json(
-        { error: 'Please use Google Sign-In for this account' },
-        { status: 401 }
-      );
-    }
+//     // Check if user has admin role (Owner, Csr, Cleaner, or Partner)
+//     const adminRoles = ['Owner', 'Csr', 'Cleaner', 'Partner'];
+//     if (!adminRoles.includes(user.user_role)) {
+//       return NextResponse.json(
+//         { error: 'You do not have admin access' },
+//         { status: 403 }
+//       );
+//     }
 
-    // Update last login
-    await pool.query(
-      'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = $1',
-      [user.user_id]
-    );
+//     // Verify password (if password exists in database)
+//     if (user.password) {
+//       const isPasswordValid = await bcrypt.compare(password, user.password);
+//       if (!isPasswordValid) {
+//         return NextResponse.json(
+//           { error: 'Invalid email or password' },
+//           { status: 401 }
+//         );
+//       }
+//     } else {
+//       // If no password is set (Google OAuth users), deny access
+//       return NextResponse.json(
+//         { error: 'Please use Google Sign-In for this account' },
+//         { status: 401 }
+//       );
+//     }
 
-    // Return success with user data and role
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: user.user_id,
-        email: user.email,
-        name: user.name,
-        role: user.user_role,
-        picture: user.picture,
-      },
-    });
-  } catch (error: any) {
-    console.error('❌ Admin login error:', error);
-    console.error('Error details:', {
-      message: error?.message,
-      code: error?.code,
-      stack: error?.stack
-    });
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error?.message || 'Unknown error'
-      },
-      { status: 500 }
-    );
-  }
+//     // Update last login
+//     await pool.query(
+//       'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = $1',
+//       [user.user_id]
+//     );
+
+//     // Return success with user data and role
+//     return NextResponse.json({
+//       success: true,
+//       user: {
+//         id: user.user_id,
+//         email: user.email,
+//         name: user.name,
+//         role: user.user_role,
+//         picture: user.picture,
+//       },
+//     });
+//   } catch (error: any) {
+//     console.error('❌ Admin login error:', error);
+//     console.error('Error details:', {
+//       message: error?.message,
+//       code: error?.code,
+//       stack: error?.stack
+//     });
+//     return NextResponse.json(
+//       {
+//         error: 'Internal server error',
+//         details: error?.message || 'Unknown error'
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+interface RequestContext {}
+
+const router = createEdgeRouter<NextRequest, RequestContext>();
+
+router.post(loginEmployee);
+
+export async function POST (request: NextRequest, ctx: RequestContext) {
+  return router.run(request, ctx) as Promise<NextResponse>;
 }

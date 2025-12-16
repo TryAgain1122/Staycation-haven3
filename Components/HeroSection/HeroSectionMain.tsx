@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchButton from "./SearchButton";
 import { Users } from "lucide-react";
 import DatePicker from "./DatePicker";
@@ -38,7 +38,9 @@ interface Guests {
 }
 
 const HeroSectionMain = () => {
-
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [showSearchBar, setShowSearchBar] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
@@ -55,6 +57,36 @@ const HeroSectionMain = () => {
     children: 0,
     infants: 0,
   });
+
+  // Scroll detection for sticky search bar with hide/show behavior
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const heroHeight = window.innerHeight - 100; // Approximate hero section height
+
+      // If within hero section, always show
+      if (currentScrollY < heroHeight) {
+        setIsScrolled(false);
+        setShowSearchBar(true);
+      }
+      // If scrolled past hero section
+      else {
+        setIsScrolled(true);
+
+        // Show on scroll up, hide on scroll down
+        if (currentScrollY < lastScrollY) {
+          setShowSearchBar(true);
+        } else if (currentScrollY > lastScrollY) {
+          setShowSearchBar(false);
+        }
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
   const handleGuestChange = (type: keyof Guests, value: number) => {
     setGuests((prev) => ({
       ...prev,
@@ -119,28 +151,103 @@ const HeroSectionMain = () => {
   const totalGuests = guests.adults + guests.children + guests.infants;
 
   return (
-    <div
-      className="relative w-full min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center overflow-hidden pt-20 pb-10 sm:pt-0 sm:pb-0"
-      style={{ backgroundImage: "url('/Images/bg.jpg')" }}
-    >
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/30 bg-opacity-40"></div>
+    <>
+      {/* Hero Section - Only visible when at top */}
+      <div
+        className={`
+          relative w-full min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center overflow-hidden pt-20 pb-10 sm:pt-0 sm:pb-0
+          transition-all duration-500 ease-in-out
+          ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+        `}
+        style={{ backgroundImage: "url('/Images/bg.jpg')" }}
+      >
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/30 bg-opacity-40"></div>
 
-      {/* Content Container */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12 w-full max-w-4xl">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
-            Find Your Perfect Stay
-          </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-100">
-            Discover amazing hotels at unbeatable prices
-          </p>
+        {/* Content Container */}
+        <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+          {/* Header Section */}
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12 w-full max-w-4xl">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
+              Find Your Perfect Stay
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-100">
+              Discover amazing hotels at unbeatable prices
+            </p>
+          </div>
+
+          {/* Search Card - Original Position */}
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 w-full max-w-6xl overflow-visible">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 overflow-visible">
+              {/* Location Selector */}
+              <div className="sm:col-span-1 h-14">
+                <LocationSelector
+                  selectedLocation={selectedLocation}
+                  onLocationSelect={(location) => {
+                    setSelectedLocation(location);
+                    setLocationOpen(false);
+                  }}
+                  isOpen={locationOpen}
+                  onToggle={() => setLocationOpen(!locationOpen)}
+                />
+              </div>
+
+              {/* Check In Date */}
+              <div className="sm:col-span-1">
+                <DatePicker
+                  label="Check In"
+                  date={checkInDate}
+                  onDateChange={setCheckInDate}
+                />
+              </div>
+
+              {/* Check Out Date */}
+              <div className="sm:col-span-1">
+                <DatePicker
+                  label="Check Out"
+                  date={checkOutDate}
+                  onDateChange={setCheckOutDate}
+                />
+              </div>
+
+              {/* Guest Selector Button */}
+              <div className="sm:col-span-1">
+                <button
+                  onClick={() => setIsGuestModalOpen(true)}
+                  className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-white rounded-lg border border-gray-200 hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 h-14 min-h-[56px] hover:shadow-md"
+                >
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">
+                      Who
+                    </p>
+                    <p className="text-xs sm:text-sm md:text-base font-semibold text-gray-800 truncate">
+                      {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Search Button */}
+              <div className="sm:col-span-2 lg:col-span-1">
+                <SearchButton onSearch={handleSearch} />
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Search Card */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 w-full max-w-6xl overflow-visible">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 overflow-visible">
+      {/* Floating Sticky Search Bar - Shows on scroll up */}
+      {isScrolled && (
+        <div
+          className={`
+            fixed left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-5xl
+            bg-white/95 backdrop-blur-md shadow-xl rounded-xl p-3 sm:p-4
+            transition-all duration-500 ease-in-out
+            ${showSearchBar ? 'top-20 opacity-100' : '-top-32 opacity-0'}
+          `}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-2 overflow-visible">
             {/* Location Selector */}
             <div className="sm:col-span-1 h-14">
               <LocationSelector
@@ -196,7 +303,7 @@ const HeroSectionMain = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Guest Selector Modal */}
       <GuestSelectorModal
@@ -221,7 +328,7 @@ const HeroSectionMain = () => {
         onClose={() => setIsValidationModalOpen(false)}
         message={validationMessage}
       />
-    </div>
+    </>
   );
 };
 

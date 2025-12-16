@@ -10,9 +10,11 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import axios from "axios";
 
 interface LoginFormState {
   email: string;
@@ -41,6 +43,7 @@ const AdminLogin = () => {
     }));
   };
 
+
   const handleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -48,7 +51,7 @@ const AdminLogin = () => {
       setFormData((prev) => ({
         ...prev,
         error: "Please fill in all fields",
-      }));
+      }))
       return;
     }
 
@@ -56,85 +59,94 @@ const AdminLogin = () => {
       toast.error("Please enter a valid email");
       setFormData((prev) => ({
         ...prev,
-        error: "Please enter a valid email",
-      }));
+        error: "Please enter a valid email"
+      }))
       return;
     }
 
     setFormData((prev) => ({
       ...prev,
       isLoading: true,
-      error: "",
-    }));
+      error: ""
+    }))
 
     try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data.details
-          ? `${data.error}: ${data.details}`
-          : data.error || "Login failed";
-
+      if (result?.error) {
         setFormData((prev) => ({
           ...prev,
           isLoading: false,
-          error: errorMessage,
         }));
-        toast.error(errorMessage);
-        console.error('Login failed:', data);
-        return;
+        toast.error(result.error)
+        return
       }
 
-      // Store user data in localStorage
-      localStorage.setItem('adminUser', JSON.stringify(data.user));
+      if (result?.ok) {
+        const { data: session } = await axios.get('/api/auth/session');
 
-      // Success - redirect based on role
-      toast.success(`Welcome back, ${data.user.name || data.user.email}!`);
+        if (!session?.user) {
+          toast.error("Failed to get session");
+          setFormData((prev) => ({
+            ...prev,
+            isLoading: false
+          }));
+          return;
+        }
 
-      // Redirect based on user role
-      switch (data.user.role) {
-        case 'Csr':
-          router.push('/admin/csr');
-          break;
-        case 'Owner':
-          router.push('/admin/owners');
-          break;
-        case 'Partner':
-          router.push('/admin/partners');
-          break;
-        case 'Cleaner':
-          router.push('/admin/cleaners');
-          break;
-        default:
-          router.push('/admin/owners');
+        toast.success(`Welcome back, ${session.user.name}!`)
+
+        const role  = session.user.role 
+
+        switch(role) {
+          case 'Csr': 
+            router.push("/admin/csr");
+            break;
+
+          case 'Owner':
+            router.push("/admin/owners");
+            break;
+
+          case 'Partner': 
+            router.push("/admin/partners");
+            break;
+
+          case 'Cleaner': 
+            router.push("/admin/cleaners");
+            break;
+          default:
+            router.push("/admin/owners")
+        }
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch(error: any) {
+      console.log("Login error: ", error);
+
+      const errorMessage = 
+        error?.response?.data?.error || 
+        error?.response?.data?.message || 
+        error?.message || 
+        "An error occurred. Please try again.";
+      
       setFormData((prev) => ({
         ...prev,
         isLoading: false,
-        error: "An error occurred. Please try again.",
+        error: errorMessage,
       }));
-      toast.error("An error occurred. Please try again.");
+      toast.error(errorMessage);
     }
-  };
+
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
-
+    
       {/* Main Container */}
       <div className="w-full max-w-md relative z-10">
         {/* Header */}

@@ -1,14 +1,14 @@
 "use client";
 
-import { X } from "lucide-react";
-import { useState } from "react";
+import { X, Upload, User } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Input } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { DatePicker } from "@nextui-org/date-picker";
 import { parseDate } from "@internationalized/date";
 import { useCreateEmployeeMutation } from "@/redux/api/employeeApi";
 import toast from "react-hot-toast";
-
+import Image from "next/image";
 interface CreateEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,25 +33,104 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
     emergencyContactName: "",
     emergencyContactPhone: "",
     emergencyContactRelation: "",
+    password: "",
+    confirmPassword: "",
+    profile_image: "",
   });
+
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string>("");
 
   const roles = [
     { value: "Owner", label: "Owner" },
-    { value: "Csr", label: "Customer Service Representative" },
+    { value: "CSR", label: "Customer Service Representative" },
     { value: "Cleaner", label: "Cleaner" },
     { value: "Partner", label: "Partner" },
   ];
 
-  const departments = [
-    { value: "front-desk", label: "Front Desk" },
-    { value: "housekeeping", label: "Housekeeping" },
-    { value: "maintenance", label: "Maintenance" },
-    { value: "management", label: "Management" },
-    { value: "customer-service", label: "Customer Service" },
-  ];
+  const departmentByRole: Record<
+    string,
+    Array<{ value: string; label: string }>
+  > = {
+    Owner: [{ value: "management", label: "Management" }],
+    CSR: [
+      { value: "front-desk", label: "Front Desk" },
+      { value: "customer-service", label: "Customer Service" },
+    ],
+    Cleaner: [
+      { value: "housekeeping", label: "housekeeping" },
+      { value: "maintenance", label: "Maintenance" },
+    ],
+    Partner: [
+      { value: "management", label: "Management" },
+      { value: "customer-service", label: "Customer Service" },
+    ],
+  };
+
+  const getAvailableDepartments = () => {
+    if (!formData.role) return [];
+    return departmentByRole[formData.role] || [];
+  };
+
+  useEffect(() => {
+    if (formData.role) {
+      const rolePrefix = formData.role.substring(0, 3).toUpperCase();
+      const timeStamp = Date.now().toString().slice(-6);
+      const generatedId = `${rolePrefix}-${timeStamp}`;
+      setFormData((prev) => ({ ...prev, employeeId: generatedId }));
+    }
+  }, [formData.role]);
+
+  useEffect(() => {
+    if (formData.role) {
+      setFormData((prev) => ({ ...prev, department: "" }));
+    }
+  }, []);
+
+  // const departments = [
+  //   { value: "front-desk", label: "Front Desk" },
+  //   { value: "housekeeping", label: "Housekeeping" },
+  //   { value: "maintenance", label: "Maintenance" },
+  //   { value: "management", label: "Management" },
+  //   { value: "customer-service", label: "Customer Service" },
+  // ];
+
+  const handleProfilePictureUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveProfilePicture = () => {
+    setProfilePicture(null);
+    setProfilePreview("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Password do not match!");
+      return;
+    }
+
+    let profileImageBase64 = null;
+    if (profilePicture) {
+      const reader = new FileReader();
+      profileImageBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(profilePicture);
+      });
+    }
 
     try {
       const employeeData = {
@@ -67,6 +146,8 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
         street_address: formData.address,
         city: formData.city,
         zip_code: formData.zipCode,
+        password: formData.password,
+        profile_image: profileImageBase64,
       };
 
       const result = await createEmployee(employeeData).unwrap();
@@ -89,12 +170,19 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
           emergencyContactName: "",
           emergencyContactPhone: "",
           emergencyContactRelation: "",
+          password: "",
+          confirmPassword: "",
+          profile_image: "",
         });
+        setProfilePicture(null);
+        setProfilePreview("");
         onClose();
       }
     } catch (error: any) {
       console.error("Error creating employee: ", error);
-      toast.error("Error creating employee: ", error);
+      const errorMessage =
+        error?.data?.error || error?.message || "Failed to create employee";
+      toast.error(errorMessage);
     }
   };
 
@@ -131,6 +219,57 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                 <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
                   Personal Information
                 </h3>
+
+                {/* Profile Picture Upload */}
+                <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="relative">
+                    {profilePreview ? (
+                      <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-orange-500 shadow-lg">
+                        <Image
+                          src={profilePreview}
+                          alt="Profile Preview"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-gray-200 border-4 border-gray-300 flex items-center justify-center">
+                        <User className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <label htmlFor="profile-picture-upload">
+                      <input
+                        type="file"
+                        id="profile-picture-upload"
+                        accept="image/*"
+                        onChange={handleProfilePictureUpload}
+                        className="hidden"
+                      />
+                      <span className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium cursor-pointer transition-colors">
+                        <Upload className="w-4 h-4" />
+                        {profilePreview ? "Change Photo" : "Upload Photo"}
+                      </span>
+                    </label>
+
+                    {profilePreview && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveProfilePicture}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500 text-center">
+                    Recommended: Square image, at least 400x400px
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Input
@@ -206,6 +345,47 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                  <Input
+                    type="password"
+                    label="Password *"
+                    placeholder="Enter password"
+                    labelPlacement="outside"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    isRequired
+                    classNames={{
+                      base: "w-full",
+                      label: "text-sm font-medium text-gray-700 mb-1",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    type="password"
+                    label="Confirm Password *"
+                    placeholder="Re-enter password"
+                    labelPlacement="outside"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    isRequired
+                    classNames={{
+                      base: "w-full",
+                      label: "text-sm font-medium text-gray-700 mb-1",
+                    }}
+                  />
+                </div>
+              </div>
+
               {/* Employment Details Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
@@ -216,13 +396,12 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                     <Input
                       type="text"
                       label="Employee ID *"
-                      placeholder="EMP-001"
+                      placeholder="Auto-generated"
                       labelPlacement="outside"
                       value={formData.employeeId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, employeeId: e.target.value })
-                      }
-                      isRequired
+                      isReadOnly
+                      isDisabled
+                      description="Auto-generated base on role"
                       classNames={{
                         base: "w-full",
                         label: "text-sm font-medium text-gray-700 mb-1",
@@ -300,7 +479,7 @@ const CreateEmployeeModal = ({ isOpen, onClose }: CreateEmployeeModalProps) => {
                         label: "text-sm font-medium text-gray-700 mb-1",
                       }}
                     >
-                      {departments.map((dept) => (
+                      {getAvailableDepartments().map((dept) => (
                         <SelectItem key={dept.value} value={dept.value}>
                           {dept.label}
                         </SelectItem>

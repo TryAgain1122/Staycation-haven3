@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
 import ProfilePage from "./ProfilePage";
+import { useSession } from "next-auth/react";
 import DashboardPage, {
   BookingsPage,
   PaymentsPage,
@@ -27,20 +28,27 @@ export default function CsrDashboard() {
   const [sidebar, setSidebar] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
-  const [user, setUser] = useState<AdminUser | null>(null);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { data: session} = useSession();
 
+
+  // Prevent back navigation to login page after login
   useEffect(() => {
-    // Get user data from localStorage
-    const adminUserData = localStorage.getItem('adminUser');
-    if (adminUserData) {
-      try {
-        const userData = JSON.parse(adminUserData);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
+    if (typeof window !== 'undefined') {
+      // Push current state to history
+      window.history.pushState(null, '', window.location.href);
+
+      // Prevent back navigation
+      const handlePopState = () => {
+        window.history.pushState(null, '', window.location.href);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
     }
   }, []);
 
@@ -160,14 +168,14 @@ export default function CsrDashboard() {
             <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-800 truncate">
-                    {user?.name || 'CSR Account'}
+                    {session?.user?.name || 'CSR Account'}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {user?.email || 'Loading...'}
+                    {session?.user?.email || 'Loading...'}
                   </p>
                 </div>
               </div>
@@ -231,7 +239,7 @@ export default function CsrDashboard() {
                 className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -243,17 +251,17 @@ export default function CsrDashboard() {
                   <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+                        {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {user?.name || 'CSR Account'}
+                          {session?.user?.name || 'CSR Account'}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                          {user?.email || 'Loading...'}
+                          {session?.user?.email || 'Loading...'}
                         </p>
                         <p className="text-xs text-orange-600 font-medium mt-1">
-                          {user?.role || 'CSR'}
+                          {(session?.user as any)?.role || 'CSR'}
                         </p>
                       </div>
                     </div>
@@ -303,7 +311,8 @@ export default function CsrDashboard() {
             {page === "cleaners" && <CleanersPage />}
             {page === "deposits" && <DepositsPage />}
             {page === "inventory" && <InventoryPage />}
-            {page === "profile" && <ProfilePage user={user} onClose={() => setPage("dashboard")} />}
+            {page === "profile" && <ProfilePage user={session?.user} onClose={() => setPage("dashboard")} />}
+
           </div>
         </div>
 

@@ -3,15 +3,16 @@
 import { X } from "lucide-react";
 
 interface AdminUser {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
+  id?: string;
+  email?: string | null;
+  name?: string | null;
+  role?: string;
   picture?: string;
+  image?: string | null;
 }
 
 interface ProfilePageProps {
-  user: AdminUser | null;
+  user: AdminUser | null | undefined;
   onClose: () => void;
 }
 
@@ -46,10 +47,10 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
           {/* Avatar Section */}
           <div className="flex flex-col items-center">
             <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-xl">
-              {user?.picture ? (
-                <img 
-                  src={user.picture} 
-                  alt={user.name} 
+              {user?.picture || user?.image ? (
+                <img
+                  src={user.picture || user.image || ''}
+                  alt={user.name || 'User'}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

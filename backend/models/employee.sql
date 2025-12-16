@@ -1,7 +1,7 @@
 CREATE TYPE employee_role AS ENUM ('Owner','CSR','Cleaner','Partner');
 
 CREATE TABLE employees (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -14,6 +14,8 @@ CREATE TABLE employees (
     street_address TEXT,
     city VARCHAR(100),
     zip_code VARCHAR(20),
+    password TEXT,
+    profile_image_url TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
-);
+)
