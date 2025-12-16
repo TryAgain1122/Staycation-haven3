@@ -231,7 +231,7 @@ export default function CsrDashboard() {
                   <p className="text-sm font-semibold text-gray-800 truncate">
                     {session?.user?.name || 'CSR Account'}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-500 truncate"> 
                     {session?.user?.email || 'Loading...'}
                   </p>
                 </div>
