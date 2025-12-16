@@ -142,7 +142,7 @@ export default function BookingsPage() {
         </div>
         <button
           onClick={() => setIsNewBookingModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all font-semibold shadow-[rgba(186,144,60,0.35)]"
         >
           <Plus className="w-5 h-5" />
           New Booking
@@ -352,7 +352,7 @@ export default function BookingsPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                      <button className="p-2 text-brand-primary hover:bg-brand-primaryLighter rounded-lg transition-colors" title="Edit">
                         <Edit className="w-4 h-4" />
                       </button>
                       <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
