@@ -247,23 +247,7 @@ export { default as PaymentsPage } from "./PaymentPage";
 
 export { default as DeliverablesPage } from "./DeliverablesPage";
 
-export function CleanersPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Users className="w-12 h-12 text-orange-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Cleaners</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage cleaner schedules and assignments.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as CleanersPage } from "./CleanersPage";
 
 export function DepositsPage() {
   return (
