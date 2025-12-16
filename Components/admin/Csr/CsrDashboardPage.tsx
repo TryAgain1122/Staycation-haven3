@@ -427,8 +427,27 @@ export default function CsrDashboard() {
                   <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center gap-3">
 
-                    <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+                    <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-lg">
+                      {isLoading ? (
+                        <div className="w-full h-full bg-gray-200 animate-pulse" />
+                      ) : employee?.profile_image_url ? (
+                        <img
+                          src={employee.profile_image_url}
+                          alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "";
+                            target.onerror = null;
+                          }}
+                        />
+                      ) : (
+                        <span>
+                          {employee
+                            ? `${employee.first_name?.[0] || ""}${employee.last_name?.[0] || ""}`.toUpperCase() || "C"
+                            : (session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "C")}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800 truncate">
