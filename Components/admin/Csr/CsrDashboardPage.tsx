@@ -197,7 +197,7 @@ export default function CsrDashboard() {
       <div
         className={`${
           sidebar ? "w-72" : "w-20"
-        } bg-white border-r border-gray-200 transition-all duration-300 flex-col sticky top-0 h-screen shadow-xl
+        } bg-white border-r border-gray-200 transition-all duration-300 flex-col sticky top-0 h-screen shadow-xl flex-shrink-0
         ${
           mobileMenuOpen
             ? "fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-300"
@@ -255,7 +255,7 @@ export default function CsrDashboard() {
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
                   page === item.id
                     ? "bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white shadow-lg shadow-[rgba(186,144,60,0.35)]"
-                    : "text-gray-600 hover:bg-gray-50 hover:shadow-md"
+                    : "text-gray-600 hover:bg-brand-primaryLighter hover:shadow-md"
                 }`}
               >
                 <Icon
@@ -279,7 +279,7 @@ export default function CsrDashboard() {
         <div className="p-2 border-t border-gray-200 bg-white">
           {sidebar && (
             <div className="mb-2">
-              <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              <div className="flex items-center gap-3 p-2 hover:bg-brand-primaryLighter rounded-lg transition-colors">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex-shrink-0 flex items-center justify-center text-white font-medium text-lg overflow-hidden">
                   {isLoading ? (
                     <div className="w-full h-full bg-gray-200 animate-pulse"></div>
@@ -338,14 +338,14 @@ export default function CsrDashboard() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
         {/* HEADER */}
         <div className="bg-white border-b border-gray-200 px-6 h-20 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg md:hidden transition-colors"
+              className="p-2 hover:bg-brand-primaryLighter rounded-lg md:hidden transition-colors"
             >
               <Menu className="w-6 h-6 text-gray-600" />
             </button>
@@ -353,7 +353,7 @@ export default function CsrDashboard() {
             {/* Desktop Sidebar Toggle */}
             <button
               onClick={() => setSidebar(!sidebar)}
-              className="p-2 hover:bg-gray-100 rounded-lg hidden md:block transition-colors"
+              className="p-2 hover:bg-brand-primaryLighter rounded-lg hidden md:block transition-colors"
             >
               {sidebar ? (
                 <X className="w-6 h-6 text-gray-600" />
@@ -376,7 +376,7 @@ export default function CsrDashboard() {
             {/* Messages */}
             <button
               ref={messageButtonRef}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="relative p-2 hover:bg-brand-primaryLighter rounded-lg transition-colors"
               onClick={() => {
                 setMessageBadge(false);
                 setPage("messages");
@@ -391,7 +391,7 @@ export default function CsrDashboard() {
             {/* Notifications */}
             <button
               ref={notificationButtonRef}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="relative p-2 hover:bg-brand-primaryLighter rounded-lg transition-colors"
               onClick={() => setNotificationOpen((prev) => !prev)}
             >
               <Bell className="w-6 h-6 text-gray-600" />
@@ -402,7 +402,7 @@ export default function CsrDashboard() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-1 hover:bg-brand-primaryLighter rounded-lg transition-colors"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full overflow-hidden flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
                   {employee?.profile_image_url ? (
@@ -469,7 +469,7 @@ export default function CsrDashboard() {
                         setPage("profile");
                         setProfileDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-brand-primaryLighter transition-colors"
                     >
                       <User className="w-4 h-4" />
                       <span className="text-sm font-medium">Profile</span>
@@ -479,7 +479,7 @@ export default function CsrDashboard() {
                         setPage("settings");
                         setProfileDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-brand-primaryLighter transition-colors"
                     >
                       <Settings className="w-4 h-4" />
                       <span className="text-sm font-medium">Settings</span>

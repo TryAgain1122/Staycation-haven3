@@ -243,41 +243,9 @@ export default function DashboardPage() {
 
 export { default as BookingsPage } from "./BookingPage";
 
-export function PaymentsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <DollarSign className="w-12 h-12 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Payments</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Track and manage payment transactions.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as PaymentsPage } from "./PaymentPage";
 
-export function DeliverablesPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FileText className="w-12 h-12 text-purple-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deliverables</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage and track service deliverables.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as DeliverablesPage } from "./DeliverablesPage";
 
 export function CleanersPage() {
   return (
