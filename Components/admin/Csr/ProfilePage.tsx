@@ -147,82 +147,97 @@ export default function ProfilePage({ user, onClose }: ProfilePageProps) {
       )}
 
       <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="flex flex-col items-center">
-            <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-xl overflow-hidden">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{displayName?.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            <p className="mt-4 text-center text-gray-600 text-sm">
-              Employment ID:{" "}
-              <span className="font-semibold text-gray-800">{employmentId}</span>
-            </p>
-            <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold uppercase tracking-wide">
-              Active
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InfoField label="Full Name" value={displayName} />
-              <InfoField label="Email Address" value={contactEmail} />
-              <InfoField label="Role" value={roleLabel} />
-              <InfoField label="Department" value={department} />
-              <InfoField label="Phone" value={phone} />
-              <InfoField label="Hire Date" value={hireDate} />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-              <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">
-                  Monthly Salary
+        {isLoading ? (
+          <ProfileSkeleton />
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex flex-col items-center">
+                <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-xl overflow-hidden">
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt={displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{displayName?.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <p className="mt-4 text-center text-gray-600 text-sm">
+                  Employment ID:{" "}
+                  <span className="font-semibold text-gray-800">{employmentId}</span>
                 </p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">{salary}</p>
+                <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold uppercase tracking-wide">
+                  Active
+                </div>
               </div>
-              <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">
-                  Office Location
-                </p>
-                <p className="text-lg font-semibold text-gray-800 mt-1">{address}</p>
+
+              <div className="flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InfoField label="Full Name" value={displayName} />
+                  <InfoField label="Email Address" value={contactEmail} />
+                  <InfoField label="Role" value={roleLabel} />
+                  <InfoField label="Department" value={department} />
+                  <InfoField label="Phone" value={phone} />
+                  <InfoField label="Hire Date" value={hireDate} />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                  <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl">
+                    <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">
+                      Monthly Salary
+                    </p>
+                    <p className="text-2xl font-bold text-gray-800 mt-1">{salary}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                    <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">
+                      Office Location
+                    </p>
+                    <p className="text-lg font-semibold text-gray-800 mt-1">{address}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {isLoading && (
-          <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading latest information...
-          </div>
+            {isLoading && (
+              <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading latest information...
+              </div>
+            )}
+          </>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
-          <div className="space-y-3">
-            <InfoRow label="Email" value={contactEmail} />
-            <InfoRow label="Phone" value={phone} />
-            <InfoRow label="Address" value={address} />
-          </div>
-        </div>
+        {isLoading ? (
+          <>
+            <CardSkeleton />
+            <CardSkeleton />
+          </>
+        ) : (
+          <>
+            <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
+              <div className="space-y-3">
+                <InfoRow label="Email" value={contactEmail} />
+                <InfoRow label="Phone" value={phone} />
+                <InfoRow label="Address" value={address} />
+              </div>
+            </div>
 
-        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Employment Details</h3>
-          <div className="space-y-3">
-            <InfoRow label="Employment ID" value={employmentId} />
-            <InfoRow label="Department" value={department} />
-            <InfoRow label="Role" value={roleLabel} />
-            <InfoRow label="Hire Date" value={hireDate} />
-          </div>
-        </div>
+            <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Employment Details</h3>
+              <div className="space-y-3">
+                <InfoRow label="Employment ID" value={employmentId} />
+                <InfoRow label="Department" value={department} />
+                <InfoRow label="Role" value={roleLabel} />
+                <InfoRow label="Hire Date" value={hireDate} />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -253,5 +268,45 @@ const InfoRow = ({ label, value }: InfoRowProps) => (
     <span className="font-medium text-gray-800 text-right">
       {value && value !== "" ? value : "Not specified"}
     </span>
+  </div>
+);
+
+const skeletonPulse = "animate-pulse bg-gray-100";
+
+const ProfileSkeleton = () => (
+  <div className="space-y-8">
+    <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col items-center gap-4">
+        <div className={`w-32 h-32 rounded-full ${skeletonPulse}`} />
+        <div className={`h-4 w-32 rounded-full ${skeletonPulse}`} />
+        <div className={`h-6 w-20 rounded-full ${skeletonPulse}`} />
+      </div>
+
+      <div className="flex-1 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div key={`field-${idx}`} className="space-y-2">
+              <div className={`h-3 w-24 rounded-full ${skeletonPulse}`} />
+              <div className={`h-5 w-full rounded-lg ${skeletonPulse}`} />
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, idx) => (
+            <div key={`stat-${idx}`} className={`h-24 rounded-xl ${skeletonPulse}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const CardSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow p-6 border border-gray-100 space-y-4">
+    <div className={`h-5 w-40 rounded-full ${skeletonPulse}`} />
+    {Array.from({ length: 3 }).map((_, idx) => (
+      <div key={`row-${idx}`} className={`h-4 w-full rounded-full ${skeletonPulse}`} />
+    ))}
   </div>
 );
