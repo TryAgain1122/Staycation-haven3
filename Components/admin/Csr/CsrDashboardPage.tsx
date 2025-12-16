@@ -14,6 +14,8 @@ import DashboardPage, {
   DepositsPage,
   InventoryPage
 } from "./DashboardPage";
+import NotificationModal from "./Modals/Notification";
+import NotificationPage from "./NotificationPage";
 
 interface AdminUser {
   id: string;
@@ -31,8 +33,33 @@ export default function CsrDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { data: session} = useSession();
+  const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { data: session } = useSession();
+  const notifications = [
+    {
+      id: "1",
+      title: "New booking pending approval",
+      description: "A new booking for Haven 2 requires CSR confirmation.",
+      timestamp: "2 mins ago",
+      type: "info",
+    },
+    {
+      id: "2",
+      title: "Payment received",
+      description: "₱12,500 from Emily Brown was confirmed.",
+      timestamp: "15 mins ago",
+      type: "success",
+    },
+    {
+      id: "3",
+      title: "Guest check-in reminder",
+      description: "Mike Wilson will arrive today at 3:00 PM.",
+      timestamp: "1 hr ago",
+      type: "warning",
+    },
+  ];
 
 
   // Prevent back navigation to login page after login
@@ -239,7 +266,11 @@ export default function CsrDashboard() {
 
           <div className="flex items-center gap-3">
             {/* Notifications */}
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              ref={notificationButtonRef}
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => setNotificationOpen((prev) => !prev)}
+            >
               <Bell className="w-6 h-6 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -330,7 +361,7 @@ export default function CsrDashboard() {
             {page === "deposits" && <DepositsPage />}
             {page === "inventory" && <InventoryPage />}
             {page === "profile" && <ProfilePage user={session?.user} onClose={() => setPage("dashboard")} />}
-
+            {page === "notifications" && <NotificationPage />}
           </div>
         </div>
 
@@ -352,6 +383,17 @@ export default function CsrDashboard() {
           </div>
         </div>
       </div>
+      {notificationOpen && (
+        <NotificationModal
+          notifications={notifications}
+          onClose={() => setNotificationOpen(false)}
+          onViewAll={() => {
+            setNotificationOpen(false);
+            setPage("notifications");
+          }}
+          anchorRef={notificationButtonRef}
+        />
+      )}
     </div>
   );
 }
