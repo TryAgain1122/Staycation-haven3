@@ -249,23 +249,7 @@ export { default as DeliverablesPage } from "./DeliverablesPage";
 
 export { default as CleanersPage } from "./CleanersPage";
 
-export function DepositsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Wallet className="w-12 h-12 text-indigo-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deposits</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Track customer deposits and refunds.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as DepositsPage } from "./DepositPage";
 
 export function InventoryPage() {
   return (
