@@ -23,6 +23,8 @@ interface AdminUser {
   picture?: string;
 }
 
+const ACTIVE_PAGE_STORAGE_KEY = "csr-dashboard-active-page";
+
 export default function CsrDashboard() {
   const router = useRouter();
   const [sidebar, setSidebar] = useState(true);
@@ -51,6 +53,21 @@ export default function CsrDashboard() {
       };
     }
   }, []);
+
+  // Restore persisted page on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedPage = window.localStorage.getItem(ACTIVE_PAGE_STORAGE_KEY);
+    if (savedPage) {
+      setPage(savedPage);
+    }
+  }, []);
+
+  // Persist page changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ACTIVE_PAGE_STORAGE_KEY, page);
+  }, [page]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -247,39 +264,24 @@ export default function CsrDashboard() {
               {/* Dropdown Menu */}
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {/* User Info */}
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">
-                          {session?.user?.name || 'CSR Account'}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {session?.user?.email || 'Loading...'}
-                        </p>
-                        <p className="text-xs text-orange-600 font-medium mt-1">
-                          {(session?.user as any)?.role || 'CSR'}
-                        </p>
-                      </div>
+                {/* User Info */}
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">
+                        {session?.user?.name || 'CSR Account'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {session?.user?.email || 'Loading...'}
+                      </p>
+                      <p className="text-xs text-orange-600 font-medium mt-1">
+                        {(session?.user as any)?.role || 'CSR'}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Menu Items */}
-                  <div className="py-2">
-                    <button
-                      onClick={() => {
-                        setPage("profile");
-                        setProfileDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <User className="w-4 h-4" />
-                      <span className="text-sm font-medium">My Profile</span>
-                    </button>
-
                     <button
                       onClick={() => {
                         setProfileDropdownOpen(false);
