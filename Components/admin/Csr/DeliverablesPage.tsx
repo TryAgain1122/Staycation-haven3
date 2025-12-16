@@ -27,6 +27,12 @@ type DeliverableItem =
   | "Extra comforter"
   | "Extra slippers";
 
+interface RequestedDeliverable {
+  item: DeliverableItem;
+  qty: number;
+  price: number;
+}
+
 type DeliverableStatus = "Pending" | "Prepared" | "Delivered" | "Cancelled";
 
 interface DeliverableRow {
@@ -37,17 +43,16 @@ interface DeliverableRow {
   checkout: string;
   status: DeliverableStatus;
   statusColor: string;
-  selected: DeliverableItem[];
+  requested: RequestedDeliverable[];
 }
 
-const ALL_DELIVERABLES: DeliverableItem[] = [
-  "Pool pass",
-  "Bath robe",
-  "Guest kit",
-  "Towels",
-  "Extra comforter",
-  "Extra slippers",
-];
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 2,
+  }).format(value);
+};
 
 export default function DeliverablesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,7 +71,10 @@ export default function DeliverablesPage() {
       checkout: "2024-03-20 11:00",
       status: "Prepared",
       statusColor: "bg-indigo-100 text-indigo-700",
-      selected: ["Guest kit", "Towels"],
+      requested: [
+        { item: "Guest kit", qty: 1, price: 0 },
+        { item: "Towels", qty: 4, price: 0 },
+      ],
     },
     {
       deliverables_id: "DL-002",
@@ -76,7 +84,10 @@ export default function DeliverablesPage() {
       checkout: "2024-03-22 11:00",
       status: "Pending",
       statusColor: "bg-yellow-100 text-yellow-700",
-      selected: ["Pool pass", "Bath robe"],
+      requested: [
+        { item: "Pool pass", qty: 2, price: 150 },
+        { item: "Bath robe", qty: 2, price: 120 },
+      ],
     },
     {
       deliverables_id: "DL-003",
@@ -86,7 +97,10 @@ export default function DeliverablesPage() {
       checkout: "2024-03-25 11:00",
       status: "Delivered",
       statusColor: "bg-green-100 text-green-700",
-      selected: ["Guest kit", "Towels", "Extra slippers"],
+      requested: [
+        { item: "Guest kit", qty: 1, price: 0 },
+        { item: "Extra slippers", qty: 3, price: 80 },
+      ],
     },
     {
       deliverables_id: "DL-004",
@@ -96,7 +110,10 @@ export default function DeliverablesPage() {
       checkout: "2024-03-27 11:00",
       status: "Pending",
       statusColor: "bg-yellow-100 text-yellow-700",
-      selected: ["Extra comforter", "Towels"],
+      requested: [
+        { item: "Extra comforter", qty: 1, price: 250 },
+        { item: "Towels", qty: 2, price: 0 },
+      ],
     },
     {
       deliverables_id: "DL-005",
@@ -106,7 +123,7 @@ export default function DeliverablesPage() {
       checkout: "2024-03-30 11:00",
       status: "Cancelled",
       statusColor: "bg-red-100 text-red-700",
-      selected: [],
+      requested: [{ item: "Pool pass", qty: 0, price: 150 }],
     },
   ]);
 
@@ -149,14 +166,14 @@ export default function DeliverablesPage() {
     }
   };
 
-  const toggleDeliverable = (deliverables_id: string, item: DeliverableItem) => {
+  const updateRequestedQty = (deliverables_id: string, item: DeliverableItem, qty: number) => {
+    const safeQty = Number.isFinite(qty) ? Math.max(0, Math.floor(qty)) : 0;
     setRows((prev) =>
       prev.map((row) => {
         if (row.deliverables_id !== deliverables_id) return row;
-        const exists = row.selected.includes(item);
         return {
           ...row,
-          selected: exists ? row.selected.filter((x) => x !== item) : [...row.selected, item],
+          requested: row.requested.map((r) => (r.item === item ? { ...r, qty: safeQty } : r)),
         };
       })
     );
@@ -356,22 +373,51 @@ export default function DeliverablesPage() {
                     <span className="text-sm text-gray-600 whitespace-nowrap">{row.checkout}</span>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 min-w-[340px]">
-                      {ALL_DELIVERABLES.map((item) => {
-                        const checked = row.selected.includes(item);
-                        return (
-                          <label key={item} className="flex items-center gap-2 text-xs text-gray-700">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleDeliverable(row.deliverables_id, item)}
-                              className="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
-                            />
-                            <span className="select-none">{item}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
+                    {row.requested.length === 0 || row.requested.every((r) => r.qty === 0) ? (
+                      <span className="text-sm text-gray-400">No requested deliverables</span>
+                    ) : (
+                      <div className="min-w-[420px]">
+                        <div className="grid grid-cols-12 gap-2 text-[11px] font-semibold text-gray-600 mb-2">
+                          <div className="col-span-5">Item</div>
+                          <div className="col-span-3 text-center">Qty</div>
+                          <div className="col-span-2 text-right">Price</div>
+                          <div className="col-span-2 text-right">Total</div>
+                        </div>
+                        <div className="space-y-2">
+                          {row.requested
+                            .filter((r) => r.qty > 0)
+                            .map((r) => (
+                              <div key={r.item} className="grid grid-cols-12 gap-2 items-center">
+                                <div className="col-span-5">
+                                  <span className="text-sm font-medium text-gray-800">{r.item}</span>
+                                </div>
+                                <div className="col-span-3 flex justify-center">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={r.qty}
+                                    onChange={(e) => updateRequestedQty(row.deliverables_id, r.item, Number(e.target.value))}
+                                    className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                  />
+                                </div>
+                                <div className="col-span-2 text-right">
+                                  <span className="text-sm text-gray-700 whitespace-nowrap">{formatCurrency(r.price)}</span>
+                                </div>
+                                <div className="col-span-2 text-right">
+                                  <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                                    {formatCurrency(r.price * r.qty)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-end">
+                          <span className="text-sm font-bold text-gray-800 whitespace-nowrap">
+                            Subtotal: {formatCurrency(row.requested.reduce((sum, r) => sum + r.price * r.qty, 0))}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td className="py-4 px-4 text-center">
                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${row.statusColor}`}>
