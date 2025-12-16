@@ -258,15 +258,18 @@ export default function CsrDashboard() {
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
                   {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? "rotate-180" : ""
+                    }`}
+                />
               </button>
 
-              {/* Dropdown Menu */}
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                {/* User Info */}
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <div className="flex items-center gap-3">
+                  {/* User Info */}
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                     </div>
@@ -282,6 +285,19 @@ export default function CsrDashboard() {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setPage("profile");
+                        setProfileDropdownOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="text-sm font-medium">Profile</span>
+                    </button>
                     <button
                       onClick={() => {
                         setProfileDropdownOpen(false);
@@ -321,7 +337,7 @@ export default function CsrDashboard() {
         {/* FOOTER */}
         <div className="bg-white border-t border-gray-200 px-6 py-4">
           <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm text-gray-600">
-            <p>© 2024 Staycation Haven. All rights reserved.</p>
+            <p> 2024 Staycation Haven. All rights reserved.</p>
             <div className="flex gap-4">
               <button className="hover:text-orange-600 transition-colors">
                 Help Center
