@@ -5,24 +5,27 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
-    const role = token?.role as string;
+    const role = token?.role as string | undefined;
+    const normalizedRole = role?.toLowerCase();
 
     console.log("Middleware checking: ", path);
     console.log("User role: ", role);
+
+    const adminRoleRoutes: Record<string, string> = {
+      owner: "/admin/owners",
+      csr: "/admin/csr",
+      cleaner: "/admin/cleaners",
+      partner: "/admin/partners",
+    };
+
+    const adminRoles = Object.keys(adminRoleRoutes);
 
     // Admin area protection
     if (path.startsWith("/admin")) {
       // If accessing admin login page
       if (path === "/admin/login") {
-        if (token?.role) {
-          const roleRoutes = {
-            Owner: "/admin/owners",
-            Csr: "/admin/csr",
-            Cleaner: "/admin/cleaners",
-            Partner: "/admin/partners",
-          };
-
-          const correctRoute = roleRoutes[role as keyof typeof roleRoutes];
+        if (normalizedRole) {
+          const correctRoute = adminRoleRoutes[normalizedRole];
           if (correctRoute) {
             console.log(`Already logged in, redirecting to ${correctRoute}`);
             return NextResponse.redirect(new URL(correctRoute, req.url));
@@ -32,22 +35,13 @@ export default withAuth(
       }
 
       // If accessing other admin pages, must have admin role
-      const adminRoles = ["Owner", "Csr", "Cleaner", "Partner"];
-
-      if (!role || !adminRoles.includes(role)) {
+      if (!normalizedRole || !adminRoles.includes(normalizedRole)) {
         console.log(`❌ No admin role detected, redirecting to admin login`);
         return NextResponse.redirect(new URL("/admin/login", req.url));
       }
 
       // Role-based routing within admin area
-      const roleRoutes = {
-        Owner: "/admin/owners",
-        Csr: "/admin/csr",
-        Cleaner: "/admin/cleaners",
-        Partner: "/admin/partners",
-      };
-
-      const correctRoute = roleRoutes[role as keyof typeof roleRoutes];
+      const correctRoute = adminRoleRoutes[normalizedRole];
 
       if (correctRoute && !path.startsWith(correctRoute)) {
         console.log(`Redirecting ${role} from ${path} to ${correctRoute}`);
@@ -57,9 +51,7 @@ export default withAuth(
 
     // User area protection - prevent admin sessions from accessing user pages
     if (!path.startsWith("/admin")) {
-      const adminRoles = ["Owner", "Csr", "Cleaner", "Partner"];
-
-      if (role && adminRoles.includes(role)) {
+      if (normalizedRole && adminRoles.includes(normalizedRole)) {
         console.log(`❌ Admin trying to access user area, auto-logout and redirect to /login`);
         // Clear session and redirect to login
         return NextResponse.redirect(new URL("/api/auth/signout?callbackUrl=/login", req.url));
