@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User } from "lucide-react";
+import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User, MessageSquare } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
@@ -16,6 +16,7 @@ import DashboardPage, {
 } from "./DashboardPage";
 import NotificationModal from "./Modals/Notification";
 import NotificationPage from "./NotificationPage";
+import MessagePage from "./MessagePage";
 
 interface AdminUser {
   id: string;
@@ -34,8 +35,10 @@ export default function CsrDashboard() {
   const [page, setPage] = useState("dashboard");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [messageBadge, setMessageBadge] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
+  const messageButtonRef = useRef<HTMLButtonElement | null>(null);
   const { data: session } = useSession();
   const notifications = [
     {
@@ -145,8 +148,8 @@ export default function CsrDashboard() {
         } md:flex`}
       >
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50">
-          <div className="flex items-center justify-between gap-3">
+        <div className="h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50 flex items-center">
+          <div className="flex items-center justify-between gap-3 w-full">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
                 SH
@@ -232,7 +235,7 @@ export default function CsrDashboard() {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* HEADER */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <div className="bg-white border-b border-gray-200 px-6 h-20 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button */}
             <button
@@ -265,6 +268,21 @@ export default function CsrDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Messages */}
+            <button
+              ref={messageButtonRef}
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => {
+                setMessageBadge(false);
+                setPage("messages");
+              }}
+            >
+              <MessageSquare className="w-6 h-6 text-gray-600" />
+              {messageBadge && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
+            </button>
+
             {/* Notifications */}
             <button
               ref={notificationButtonRef}
@@ -273,11 +291,6 @@ export default function CsrDashboard() {
             >
               <Bell className="w-6 h-6 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* Settings */}
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Settings className="w-6 h-6 text-gray-600" />
             </button>
 
             {/* User Avatar with Profile Dropdown */}
@@ -362,6 +375,7 @@ export default function CsrDashboard() {
             {page === "inventory" && <InventoryPage />}
             {page === "profile" && <ProfilePage user={session?.user} onClose={() => setPage("dashboard")} />}
             {page === "notifications" && <NotificationPage />}
+            {page === "messages" && <MessagePage />}
           </div>
         </div>
 
