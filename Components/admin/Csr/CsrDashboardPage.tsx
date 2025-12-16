@@ -13,11 +13,12 @@ import DashboardPage, {
   DeliverablesPage,
   CleanersPage,
   DepositsPage,
-  InventoryPage
+  InventoryPage,
 } from "./DashboardPage";
-import NotificationModal from "./Modals/Notification";
 import NotificationPage from "./NotificationPage";
+import NotificationModal from "./Modals/Notification";
 import MessagePage from "./MessagePage";
+import SettingsPage from "./SettingsPage";
 
 interface AdminUser {
   id: string;
@@ -354,6 +355,7 @@ export default function CsrDashboard() {
                     </button>
                     <button
                       onClick={() => {
+                        setPage("settings");
                         setProfileDropdownOpen(false);
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
@@ -386,6 +388,7 @@ export default function CsrDashboard() {
             {page === "profile" && <ProfilePage user={session?.user} onClose={() => setPage("dashboard")} />}
             {page === "notifications" && <NotificationPage />}
             {page === "messages" && <MessagePage />}
+            {page === "settings" && <SettingsPage />}
           </div>
         </div>
 
