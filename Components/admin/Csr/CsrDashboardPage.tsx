@@ -122,7 +122,7 @@ export default function CsrDashboard() {
     { id: "bookings", icon: Calendar, label: "Bookings", color: "text-green-500" },
     { id: "payments", icon: DollarSign, label: "Payments", color: "text-purple-500" },
     { id: "deliverables", icon: FileText, label: "Deliverables", color: "text-pink-500" },
-    { id: "cleaners", icon: Users, label: "Cleaners", color: "text-orange-500" },
+    { id: "cleaners", icon: Users, label: "Cleaners", color: "text-brand-primary" },
     { id: "deposits", icon: Wallet, label: "Deposits", color: "text-indigo-500" },
     { id: "inventory", icon: Package, label: "Inventory", color: "text-teal-500" },
   ];
@@ -149,7 +149,7 @@ export default function CsrDashboard() {
         } md:flex`}
       >
         {/* Logo Section */}
-        <div className="h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50 flex items-center">
+        <div className="h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-brand-primarySoft to-white flex items-center">
           <div className="flex items-center justify-between gap-3 w-full">
             <div
               className={`flex items-center ${sidebar ? "gap-3" : "justify-center w-full"}`}
@@ -198,7 +198,7 @@ export default function CsrDashboard() {
                 }}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
                   page === item.id
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200"
+                    ? "bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white shadow-lg shadow-[rgba(186,144,60,0.35)]"
                     : "text-gray-600 hover:bg-gray-50 hover:shadow-md"
                 }`}
               >
@@ -224,7 +224,7 @@ export default function CsrDashboard() {
           {sidebar && (
             <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold">
                   {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -309,7 +309,7 @@ export default function CsrDashboard() {
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
                   {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <ChevronDown
@@ -324,7 +324,7 @@ export default function CsrDashboard() {
                   <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center gap-3">
 
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -334,7 +334,7 @@ export default function CsrDashboard() {
                       <p className="text-xs text-gray-500 truncate">
                         {session?.user?.email || 'Loading...'}
                       </p>
-                      <p className="text-xs text-orange-600 font-medium mt-1">
+                      <p className="text-xs text-brand-primary font-medium mt-1">
                         {(session?.user as any)?.role || 'CSR'}
                       </p>
                     </div>
@@ -394,13 +394,13 @@ export default function CsrDashboard() {
           <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm text-gray-600">
             <p> 2024 Staycation Haven. All rights reserved.</p>
             <div className="flex gap-4">
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Help Center
               </button>
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Privacy Policy
               </button>
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Terms of Service
               </button>
             </div>
