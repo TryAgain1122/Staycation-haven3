@@ -176,29 +176,57 @@ import RoomsDetailsPage from "@/Components/Rooms/RoomsDetailsPage";
 import { useGetHavenByIdQuery } from "@/redux/api/roomApi";
 
 const RoomDetailsPageRoute = () => {
-  const params = useParams();
   const router = useRouter();
-  const roomId = params.id as string;
+  const params = useParams<{ id: string }>();
+  const roomId = params?.id;
 
-  const { data: room, isLoading, isError } = useGetHavenByIdQuery(roomId);
+  // Huwag i-call ang hook kung undefined
+  const { data: room, isLoading, isError } = useGetHavenByIdQuery(roomId ?? "", {
+    skip: !roomId,
+  });
 
-  if (isLoading) return <p>Loading room...</p>;
-  if (isError || !room) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Room Not Found</h1>
-        <button
-          onClick={() => router.push('/')}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg"
-        >
-          Back to Home
-        </button>
+  if (!roomId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading...</p>
       </div>
-    </div>
-  );
+    );
+  }
 
-  return <RoomsDetailsPage room={room} onBack={() => router.push('/')} />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading room...</p>
+      </div>
+    );
+  }
+
+  if (isError || !room) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Room Not Found
+          </h1>
+          <button
+            onClick={() => router.push("/rooms")}
+            className="bg-gradient-to-r from-orange-500 to-orange-500 text-white px-6 py-3 rounded-lg"
+          >
+            Back to Rooms
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <RoomsDetailsPage 
+      room={room}
+      onBack={() => router.push("/rooms")}
+    />
+  );
 };
 
 export default RoomDetailsPageRoute;
+
 

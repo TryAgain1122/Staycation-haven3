@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { upload_file } from "../utils/cloudinary";
 import pool from "../config/db";
 
-
 //  /api/addHavenRoom/route.ts
 
 export const createHaven = async (req: NextRequest): Promise<NextResponse> => {
@@ -104,12 +103,12 @@ export const createHaven = async (req: NextRequest): Promise<NextResponse> => {
     const havenRow = havenResult.rows[0];
     const havenId = havenRow.id || havenRow.uuid_id;
 
-    console.log('✅ Haven ID:', havenId);
-    console.log('✅ Haven Result:', havenRow);
-    console.log('✅ All keys in Haven Result:', Object.keys(havenRow));
+    console.log("✅ Haven ID:", havenId);
+    console.log("✅ Haven Result:", havenRow);
+    console.log("✅ All keys in Haven Result:", Object.keys(havenRow));
 
     if (!havenId) {
-      throw new Error('Failed to create haven: No ID returned');
+      throw new Error("Failed to create haven: No ID returned");
     }
 
     if (havenImageUrls.length > 0) {
@@ -136,15 +135,16 @@ export const createHaven = async (req: NextRequest): Promise<NextResponse> => {
       }
     }
 
-        
     if (blocked_dates && blocked_dates.length > 0) {
       for (const dateRange of blocked_dates) {
         // Ensure from_date is always before or equal to to_date
         const fromDate = new Date(dateRange.from_date);
         const toDate = new Date(dateRange.to_date);
 
-        const actualFromDate = fromDate <= toDate ? dateRange.from_date : dateRange.to_date;
-        const actualToDate = fromDate <= toDate ? dateRange.to_date : dateRange.from_date;
+        const actualFromDate =
+          fromDate <= toDate ? dateRange.from_date : dateRange.to_date;
+        const actualToDate =
+          fromDate <= toDate ? dateRange.to_date : dateRange.from_date;
 
         await pool.query(
           `INSERT INTO blocked_dates (haven_id, from_date, to_date, reason, created_at)
@@ -154,23 +154,26 @@ export const createHaven = async (req: NextRequest): Promise<NextResponse> => {
       }
     }
 
-    console.log('✅ Haven Created:', havenResult.rows[0]);
+    console.log("✅ Haven Created:", havenResult.rows[0]);
 
     return NextResponse.json({
-        success: true,
-        data: {
-            haven: havenResult.rows[0],
-            images: havenImageUrls,
-            photo_tours: photoTourUrls,
-            message: 'Haven created successfully'
-        }
-    })
+      success: true,
+      data: {
+        haven: havenResult.rows[0],
+        images: havenImageUrls,
+        photo_tours: photoTourUrls,
+        message: "Haven created successfully",
+      },
+    });
   } catch (error) {
-  console.log('❌ Error Creating haven:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create haven',
-    }, { status: 500 });
+    console.log("❌ Error Creating haven:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to create haven",
+      },
+      { status: 500 }
+    );
   }
 };
 
@@ -178,9 +181,9 @@ export const createHaven = async (req: NextRequest): Promise<NextResponse> => {
 export const getAllHavens = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const { searchParams } = new URL(req.url);
-    const tower = searchParams.get('tower');
-    const view_type = searchParams.get('view_type');
-    const min_capacity = searchParams.get('min_capacity');
+    const tower = searchParams.get("tower");
+    const view_type = searchParams.get("view_type");
+    const min_capacity = searchParams.get("min_capacity");
 
     let query = `
       SELECT h.*,
@@ -216,10 +219,10 @@ export const getAllHavens = async (req: NextRequest): Promise<NextResponse> => {
     }
 
     if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
+      query += " WHERE " + conditions.join(" AND ");
     }
 
-    query += ' GROUP BY h.uuid_id ORDER BY h.created_at DESC';
+    query += " GROUP BY h.uuid_id ORDER BY h.created_at DESC";
 
     const result = await pool.query(query, values);
     console.log(`✅ Retrieved ${result.rows.length} havens`);
@@ -229,26 +232,31 @@ export const getAllHavens = async (req: NextRequest): Promise<NextResponse> => {
       data: result.rows,
       count: result.rows.length,
     });
-
   } catch (error: any) {
-    console.log('❌ Error getting havens:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Failed to get havens',
-    }, { status: 500 });
+    console.log("❌ Error getting havens:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to get havens",
+      },
+      { status: 500 }
+    );
   }
 };
 
 export const getHavenById = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({
-        success: false,
-        error: 'Haven ID is required',
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Haven ID is required",
+        },
+        { status: 400 }
+      );
     }
 
     const query = `
@@ -270,24 +278,29 @@ export const getHavenById = async (req: NextRequest): Promise<NextResponse> => {
     const result = await pool.query(query, [id]);
 
     if (result.rows.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Haven not found',
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Haven not found",
+        },
+        { status: 404 }
+      );
     }
 
-    console.log('✅ Retrieved haven:', result.rows[0]);
+    console.log("✅ Retrieved haven:", result.rows[0]);
 
     return NextResponse.json({
       success: true,
       data: result.rows[0],
     });
-
   } catch (error: any) {
-    console.log('❌ Error getting haven:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Failed to get haven',
-    }, { status: 500 });
+    console.log("❌ Error getting haven:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to get haven",
+      },
+      { status: 500 }
+    );
   }
 };
