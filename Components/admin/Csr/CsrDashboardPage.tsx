@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User } from "lucide-react";
+import { Menu, X, Home, Calendar, DollarSign, FileText, Users, Wallet, Package, Settings, Bell, ChevronDown, User, MessageSquare } from "lucide-react";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CsrLogout from "./Auth/CsrLogout";
@@ -12,16 +13,40 @@ import DashboardPage, {
   DeliverablesPage,
   CleanersPage,
   DepositsPage,
-  InventoryPage
+  InventoryPage,
 } from "./DashboardPage";
+import NotificationPage from "./NotificationPage";
+import NotificationModal from "./Modals/Notification";
+import MessagePage from "./MessagePage";
+import SettingsPage from "./SettingsPage";
+
+interface EmployeeProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  employment_id: string;
+  hire_date: string;
+  role: string;
+  department?: string;
+  monthly_salary?: number;
+  street_address?: string;
+  city?: string;
+  zip_code?: string;
+  profile_image_url?: string;
+}
 
 interface AdminUser {
   id: string;
-  email: string;
-  name: string;
-  role: string;
-  picture?: string;
+  email?: string | null;
+  name?: string | null;
+  role?: string;
+  image?: string | null;
+  profile_image_url?: string;
 }
+
+const ACTIVE_PAGE_STORAGE_KEY = "csr-dashboard-active-page";
 
 export default function CsrDashboard() {
   const router = useRouter();
@@ -29,8 +54,38 @@ export default function CsrDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [messageBadge, setMessageBadge] = useState(true);
+  const [now, setNow] = useState(() => new Date());
+  const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { data: session} = useSession();
+  const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
+  const messageButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { data: session } = useSession();
+  const notifications = [
+    {
+      id: "1",
+      title: "New booking pending approval",
+      description: "A new booking for Haven 2 requires CSR confirmation.",
+      timestamp: "2 mins ago",
+      type: "info" as const,
+    },
+    {
+      id: "2",
+      title: "Payment received",
+      description: "₱12,500 from Emily Brown was confirmed.",
+      timestamp: "15 mins ago",
+      type: "success" as const,
+    },
+    {
+      id: "3",
+      title: "Guest check-in reminder",
+      description: "Mike Wilson will arrive today at 3:00 PM.",
+      timestamp: "1 hr ago",
+      type: "warning" as const,
+    },
+  ];
 
 
   // Prevent back navigation to login page after login
@@ -51,6 +106,64 @@ export default function CsrDashboard() {
       };
     }
   }, []);
+
+  // Restore persisted page on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedPage = window.localStorage.getItem(ACTIVE_PAGE_STORAGE_KEY);
+    if (savedPage) {
+      setPage(savedPage);
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Fetch employee data
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const controller = new AbortController();
+
+    const fetchEmployeeData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/admin/employees/${session.user.id}`, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(payload?.error || "Failed to load employee data");
+        }
+
+        setEmployee(payload?.data ?? null);
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+        console.error("Error fetching employee data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployeeData();
+
+    return () => controller.abort();
+  }, [session?.user?.id]);
+
+  // Persist page changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ACTIVE_PAGE_STORAGE_KEY, page);
+  }, [page]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -74,13 +187,13 @@ export default function CsrDashboard() {
     { id: "bookings", icon: Calendar, label: "Bookings", color: "text-green-500" },
     { id: "payments", icon: DollarSign, label: "Payments", color: "text-purple-500" },
     { id: "deliverables", icon: FileText, label: "Deliverables", color: "text-pink-500" },
-    { id: "cleaners", icon: Users, label: "Cleaners", color: "text-orange-500" },
+    { id: "cleaners", icon: Users, label: "Cleaners", color: "text-brand-primary" },
     { id: "deposits", icon: Wallet, label: "Deposits", color: "text-indigo-500" },
     { id: "inventory", icon: Package, label: "Inventory", color: "text-teal-500" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex">
       {/* Mobile Menu Backdrop */}
       {mobileMenuOpen && (
         <div
@@ -93,7 +206,7 @@ export default function CsrDashboard() {
       <div
         className={`${
           sidebar ? "w-72" : "w-20"
-        } bg-white border-r border-gray-200 transition-all duration-300 flex-col sticky top-0 h-screen shadow-xl
+        } bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex-col sticky top-0 h-screen shadow-xl flex-shrink-0
         ${
           mobileMenuOpen
             ? "fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-300"
@@ -101,18 +214,27 @@ export default function CsrDashboard() {
         } md:flex`}
       >
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                SH
+        <div className="h-20 px-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-brand-primarySoft to-white dark:from-gray-900 dark:to-gray-900 flex items-center">
+          <div className="flex items-center justify-between gap-3 w-full">
+            <div
+              className={`flex items-center ${sidebar ? "gap-3" : "justify-center w-full"}`}
+            >
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/haven_logo.png"
+                  alt="Staycation Haven logo"
+                  width={48}
+                  height={48}
+                  className="object-cover"
+                  priority
+                />
               </div>
               {sidebar && (
                 <div>
-                  <h1 className="font-bold text-lg text-gray-800">
+                  <h1 className="font-bold text-lg text-gray-800 dark:text-gray-100">
                     Staycation Haven
                   </h1>
-                  <p className="text-xs text-gray-500">CSR Portal</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">CSR Portal</p>
                 </div>
               )}
             </div>
@@ -120,9 +242,9 @@ export default function CsrDashboard() {
             {mobileMenuOpen && (
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 hover:bg-white/50 rounded-lg md:hidden transition-colors"
+                className="p-2 hover:bg-white/50 dark:hover:bg-gray-800 rounded-lg md:hidden transition-colors"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
             )}
           </div>
@@ -141,8 +263,8 @@ export default function CsrDashboard() {
                 }}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
                   page === item.id
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200"
-                    : "text-gray-600 hover:bg-gray-50 hover:shadow-md"
+                    ? "bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white shadow-lg shadow-[rgba(186,144,60,0.35)]"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 hover:shadow-md"
                 }`}
               >
                 <Icon
@@ -163,128 +285,218 @@ export default function CsrDashboard() {
         </nav>
 
         {/* User Profile & Logout */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-2 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           {sidebar && (
-            <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+            <div className="mb-2">
+              <div className="flex items-center gap-3 p-2 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex-shrink-0 flex items-center justify-center text-white font-medium text-lg overflow-hidden">
+                  {isLoading ? (
+                    <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                  ) : employee?.profile_image_url ? (
+                    <img
+                      src={employee.profile_image_url}
+                      alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : 'Profile'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '';
+                        target.onerror = null;
+                      }}
+                    />
+                  ) : (
+                    <span>
+                      {employee ? 
+                        `${employee.first_name?.[0] || ''}${employee.last_name?.[0] || ''}`.toUpperCase() || 'C'
+                        : 'C'
+                      }
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">
-                    {session?.user?.name || 'CSR Account'}
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+                    {isLoading ? (
+                      <span className="inline-block h-4 bg-gray-200 rounded animate-pulse w-24"></span>
+                    ) : employee ? (
+                      `${employee.first_name} ${employee.last_name}`.trim()
+                    ) : (
+                      session?.user?.name || 'CSR Account'
+                    )}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {session?.user?.email || 'Loading...'}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {isLoading ? (
+                      <span className="inline-block h-3 bg-gray-100 rounded animate-pulse w-20 mt-0.5"></span>
+                    ) : employee?.role || (session?.user as any)?.role ? (
+                      employee?.role || (session?.user as any)?.role
+                    ) : (
+                      'CSR Staff'
+                    )}
                   </p>
                 </div>
               </div>
+              <div className="mt-2">
+                <CsrLogout sidebar={true} />
+              </div>
             </div>
           )}
-          <CsrLogout sidebar={sidebar} />
+          {!sidebar && (
+            <div className="flex justify-center py-2">
+              <CsrLogout sidebar={false} />
+            </div>
+          )}
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-x-hidden overflow-y-auto">
         {/* HEADER */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 h-20 min-h-20 flex-shrink-0 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg md:hidden transition-colors"
+              className="p-2 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg md:hidden transition-colors"
             >
-              <Menu className="w-6 h-6 text-gray-600" />
+              <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
             </button>
 
             {/* Desktop Sidebar Toggle */}
             <button
               onClick={() => setSidebar(!sidebar)}
-              className="p-2 hover:bg-gray-100 rounded-lg hidden md:block transition-colors"
+              className="p-2 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg hidden md:block transition-colors"
             >
               {sidebar ? (
-                <X className="w-6 h-6 text-gray-600" />
+                <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               ) : (
-                <Menu className="w-6 h-6 text-gray-600" />
+                <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               )}
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                {navItems.find((item) => item.id === page)?.label ||
-                  "Dashboard"}
-              </h1>
-              <p className="text-sm text-gray-500">
-                Welcome back! Here&apos;s what&apos;s happening today.
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                {now.toLocaleString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {now.toLocaleString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notifications */}
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell className="w-6 h-6 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            {/* Messages */}
+            <button
+              ref={messageButtonRef}
+              className="relative p-2 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg transition-colors"
+              onClick={() => {
+                setMessageBadge(false);
+                setPage("messages");
+              }}
+            >
+              <MessageSquare className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              {messageBadge && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </button>
 
-            {/* Settings */}
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Settings className="w-6 h-6 text-gray-600" />
+            {/* Notifications */}
+            <button
+              ref={notificationButtonRef}
+              className="relative p-2 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg transition-colors"
+              onClick={() => setNotificationOpen((prev) => !prev)}
+            >
+              <Bell className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
             {/* User Avatar with Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-1 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
-                  {session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full overflow-hidden flex items-center justify-center text-white font-bold cursor-pointer hover:shadow-lg transition-shadow">
+                  {employee?.profile_image_url ? (
+                    <img
+                      src={employee.profile_image_url}
+                      alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{session?.user?.name ? session?.user?.name.charAt(0).toUpperCase() : 'C'}</span>
+                  )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${profileDropdownOpen ? "rotate-180" : ""
+                    }`}
+                />
               </button>
 
-              {/* Dropdown Menu */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* User Info */}
-                  <div className="px-4 py-3 border-b border-gray-200">
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {session?.user?.name? session?.user?.name.charAt(0).toUpperCase() : 'C'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">
-                          {session?.user?.name || 'CSR Account'}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {session?.user?.email || 'Loading...'}
-                        </p>
-                        <p className="text-xs text-orange-600 font-medium mt-1">
-                          {(session?.user as any)?.role || 'CSR'}
-                        </p>
-                      </div>
+
+                    <div className="w-12 h-12 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-lg">
+                      {isLoading ? (
+                        <div className="w-full h-full bg-gray-200 animate-pulse" />
+                      ) : employee?.profile_image_url ? (
+                        <img
+                          src={employee.profile_image_url}
+                          alt={employee.first_name ? `${employee.first_name} ${employee.last_name}` : "Profile"}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "";
+                            target.onerror = null;
+                          }}
+                        />
+                      ) : (
+                        <span>
+                          {employee
+                            ? `${employee.first_name?.[0] || ""}${employee.last_name?.[0] || ""}`.toUpperCase() || "C"
+                            : (session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "C")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+                        {session?.user?.name || 'CSR Account'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {session?.user?.email || 'Loading...'}
+                      </p>
+                      <p className="text-xs text-brand-primary font-medium mt-1">
+                        {(session?.user as any)?.role || 'CSR'}
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  {/* Menu Items */}
-                  <div className="py-2">
+                  <div className="py-1">
                     <button
                       onClick={() => {
                         setPage("profile");
                         setProfileDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 transition-colors"
                     >
                       <User className="w-4 h-4" />
-                      <span className="text-sm font-medium">My Profile</span>
+                      <span className="text-sm font-medium">Profile</span>
                     </button>
-
                     <button
                       onClick={() => {
+                        setPage("settings");
                         setProfileDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-brand-primaryLighter dark:hover:bg-gray-800 transition-colors"
                     >
                       <Settings className="w-4 h-4" />
                       <span className="text-sm font-medium">Settings</span>
@@ -292,7 +504,7 @@ export default function CsrDashboard() {
                   </div>
 
                   {/* Logout */}
-                  <div className="border-t border-gray-200 pt-2 px-2">
+                  <div className="border-t border-gray-200 dark:border-gray-800 pt-2 px-2">
                     <CsrLogout sidebar={true} />
                   </div>
                 </div>
@@ -302,7 +514,7 @@ export default function CsrDashboard() {
         </div>
 
         {/* PAGE CONTENT */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6">
           <div className="max-w-[1600px] mx-auto">
             {page === "dashboard" && <DashboardPage />}
             {page === "bookings" && <BookingsPage />}
@@ -312,28 +524,41 @@ export default function CsrDashboard() {
             {page === "deposits" && <DepositsPage />}
             {page === "inventory" && <InventoryPage />}
             {page === "profile" && <ProfilePage user={session?.user} onClose={() => setPage("dashboard")} />}
-
+            {page === "notifications" && <NotificationPage />}
+            {page === "messages" && <MessagePage />}
+            {page === "settings" && <SettingsPage />}
           </div>
         </div>
 
         {/* FOOTER */}
-        <div className="bg-white border-t border-gray-200 px-6 py-4">
-          <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm text-gray-600">
-            <p>© 2024 Staycation Haven. All rights reserved.</p>
+        <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-6 py-4">
+          <div className="max-w-[1600px] mx-auto flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+            <p> 2024 Staycation Haven. All rights reserved.</p>
             <div className="flex gap-4">
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Help Center
               </button>
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Privacy Policy
               </button>
-              <button className="hover:text-orange-600 transition-colors">
+              <button className="hover:text-brand-primary transition-colors">
                 Terms of Service
               </button>
             </div>
           </div>
         </div>
       </div>
+      {notificationOpen && (
+        <NotificationModal
+          notifications={notifications}
+          onClose={() => setNotificationOpen(false)}
+          onViewAll={() => {
+            setNotificationOpen(false);
+            setPage("notifications");
+          }}
+          anchorRef={notificationButtonRef}
+        />
+      )}
     </div>
   );
 }

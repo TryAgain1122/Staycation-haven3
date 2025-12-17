@@ -52,25 +52,25 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity Table */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 border border-transparent dark:border-gray-800">
+        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Recent Activity</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+              <tr className="border-b-2 border-gray-200 dark:border-gray-800">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Time
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Action
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Customer
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Details
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700">
+                <th className="text-center py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-200">
                   Status
                 </th>
               </tr>
@@ -132,29 +132,29 @@ export default function DashboardPage() {
                 return (
                   <tr
                     key={i}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-in fade-in duration-500"
+                    className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors animate-in fade-in duration-500"
                     style={{ animationDelay: `${i * 50}ms` }}
                   >
                     <td className="py-4 px-4">
-                      <span className="text-sm font-medium text-gray-600">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         {item.time}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <ActivityIcon className={`w-5 h-5 ${item.iconColor}`} />
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                           {item.action}
                         </span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="text-sm font-medium text-gray-800">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
                         {item.customer}
                       </p>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         {item.details}
                       </span>
                     </td>
@@ -173,8 +173,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-          <p className="text-sm text-gray-600">Showing 5 of 48 activities</p>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Showing 5 of 48 activities</p>
           <button className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors">
             View All Activity
           </button>
@@ -183,8 +183,8 @@ export default function DashboardPage() {
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Today&apos;s Tasks</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Today&apos;s Tasks</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Check-ins</span>
@@ -201,8 +201,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Payment Status</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Payment Status</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Paid</span>
@@ -219,8 +219,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Inventory Alerts</h4>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-transparent dark:border-gray-800">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Inventory Alerts</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Low Stock</span>
@@ -243,92 +243,12 @@ export default function DashboardPage() {
 
 export { default as BookingsPage } from "./BookingPage";
 
-export function PaymentsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <DollarSign className="w-12 h-12 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Payments</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Track and manage payment transactions.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as PaymentsPage } from "./PaymentPage";
 
-export function DeliverablesPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FileText className="w-12 h-12 text-purple-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deliverables</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage and track service deliverables.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as DeliverablesPage } from "./DeliverablesPage";
 
-export function CleanersPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Users className="w-12 h-12 text-orange-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Cleaners</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage cleaner schedules and assignments.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as CleanersPage } from "./CleanersPage";
 
-export function DepositsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Wallet className="w-12 h-12 text-indigo-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Deposits</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Track customer deposits and refunds.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as DepositsPage } from "./DepositPage";
 
-export function InventoryPage() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Package className="w-12 h-12 text-pink-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Inventory</h2>
-          <p className="text-gray-600 max-w-md mx-auto mb-6">
-            Manage property inventory and supplies.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export { default as InventoryPage } from "./InventoryPage";

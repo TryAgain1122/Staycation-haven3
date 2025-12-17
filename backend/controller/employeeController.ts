@@ -99,6 +99,46 @@ export const createEmployee = async (req: NextRequest): Promise<NextResponse> =>
   }
 };
 
+// GET Employee by ID
+export const getEmployeeById = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const url = new URL(req.url);
+    const segments = url.pathname.split("/");
+    const id = segments.pop() || segments.pop(); // handle trailing slash
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Employee ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const query = `SELECT * FROM employees WHERE id = $1 LIMIT 1`;
+    const result = await pool.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Employee not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.log("❌ Error getting employee:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to get employee",
+      },
+      { status: 500 }
+    );
+  }
+};
+
 // GET All Employees
 export const getAllEmployees = async (req: NextRequest): Promise<NextResponse> => {
   try {

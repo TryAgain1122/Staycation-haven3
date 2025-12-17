@@ -81,41 +81,43 @@ const AdminLogin = () => {
         setFormData((prev) => ({
           ...prev,
           isLoading: false,
+          error: result.error || "Invalid email or password",
         }));
-        toast.error(result.error)
-        return
+        toast.error(result.error || "Invalid email or password");
+        return;
       }
 
       if (result?.ok) {
         const { data: session } = await axios.get('/api/auth/session');
 
         if (!session?.user) {
-          toast.error("Failed to get session");
           setFormData((prev) => ({
             ...prev,
-            isLoading: false
+            isLoading: false,
+            error: "Failed to get session",
           }));
+          toast.error("Failed to get session");
           return;
         }
 
         toast.success(`Welcome back, ${session.user.name}!`)
 
-        const role  = session.user.role 
+        const role = session.user.role?.toLowerCase();
 
         switch(role) {
-          case 'Csr': 
+          case 'csr': 
             router.push("/admin/csr");
             break;
 
-          case 'Owner':
+          case 'owner':
             router.push("/admin/owners");
             break;
 
-          case 'Partner': 
+          case 'partner': 
             router.push("/admin/partners");
             break;
 
-          case 'Cleaner': 
+          case 'cleaner': 
             router.push("/admin/cleaners");
             break;
           default:
@@ -138,7 +140,6 @@ const AdminLogin = () => {
       }));
       toast.error(errorMessage);
     }
-
   }
 
   return (

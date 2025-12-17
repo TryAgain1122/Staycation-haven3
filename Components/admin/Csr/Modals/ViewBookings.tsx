@@ -24,15 +24,16 @@ interface ViewBookingsProps {
 export default function ViewBookings({ booking, onClose }: ViewBookingsProps) {
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+  style={{ isolation: "isolate" }}
+>
+
       <div
         className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 z-[10000] bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <div>
             <h2 className="text-2xl font-bold">Booking Details</h2>
             <p className="text-sm opacity-90">Booking ID: {booking.id}</p>
