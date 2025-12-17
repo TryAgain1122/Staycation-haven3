@@ -143,17 +143,17 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-brand-primaryLighter via-white to-brand-primarySoft flex items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative Background */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primaryLight/30 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-primaryLight/30 rounded-full blur-3xl"></div>
     
       {/* Main Container */}
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-10 animate-in fade-in-slide-from-top duration-700">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-primaryLight rounded-full flex items-center justify-center">
               <Home className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -194,7 +194,7 @@ const AdminLogin = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Enter your email"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 placeholder-gray-500"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-300 placeholder-gray-500"
                 />
               </div>
             </div>
@@ -212,7 +212,7 @@ const AdminLogin = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter your password"
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 placeholder-gray-500"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-300 placeholder-gray-500"
                 />
                 <button
                   type="button"
@@ -247,7 +247,7 @@ const AdminLogin = () => {
                 <span>Remember me</span>
               </label>
               <Link
-                className="text-orange-600 hover:text-orange-700 transition-colors font-semibold"
+                className="text-brand-primary hover:text-brand-primaryDark transition-colors font-semibold"
                 href={"#"}
               >
                 Forgot Password
@@ -258,7 +258,7 @@ const AdminLogin = () => {
             <button
               onClick={handleLogin}
               disabled={formData.isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-gradient-to-r from-brand-primary to-brand-primaryLight hover:from-brand-primaryDark hover:to-brand-primaryLight text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
             >
               {!formData.isLoading && <LogIn className="w-5 h-5" />}
               <span>{formData.isLoading ? "Logging in..." : "Login"}</span>
@@ -268,7 +268,7 @@ const AdminLogin = () => {
 
           {/* footer */}
           <p className="text-center text-xs text-gray-500 mt-6">Need help? Contact{' '}
-            <Link href={"mailto:support@staycationhaven.com"} className="text-orange-400 hover:text-orange-700 transition-colors">support@staycationhaven.com</Link>
+            <Link href={"mailto:support@staycationhaven.com"} className="text-brand-primary hover:text-brand-primaryDark transition-colors">support@staycationhaven.com</Link>
           </p>
         </div>
 
@@ -281,7 +281,7 @@ const AdminLogin = () => {
       {formData.isLoading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 text-center border border-gray-300">
-            <div className="w-12 h-12 border-4 border-gray-300 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-gray-300 border-t-brand-primary rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-700 font-semibold">Verifying Credentials...</p>
           </div>
         </div>
